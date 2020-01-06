@@ -11,12 +11,19 @@ This peak load forecasting application provides two resources for New York City 
 - Flask
 - Dash 
 
+## EDA
 
+## Features 
 
+## Load Curve 
+
+## Peak Day Confidence Interval 
+
+## Front End App
 
 ## Conclusion
 
-## Improvements Coming Soon 
+## Coming Soon 
 - Higher accuracy load curve for non-peak season days 
 - Add nuanced weather data 
 - Including more ISOs (PJM will be next)
