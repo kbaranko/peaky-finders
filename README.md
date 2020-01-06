@@ -11,7 +11,11 @@ This peak load forecasting application provides two resources for New York City 
 - Flask
 - Dash 
 
-## EDA
+## Data
+
+To train the models, I used the PYISO 
+
+![Distribution of CO2 Emissions per Capita by Country](images/model_1_target_distribution.png)
 
 ## Features 
 
@@ -23,8 +27,12 @@ This peak load forecasting application provides two resources for New York City 
 
 ## Conclusion
 
+
+- Link to [slideshow](https://docs.google.com/presentation/d/1AdA7OE8VJQxQF6DAVs81xLXPfjvnHUb99oBfRkqpB7M/edit#slide=id.g6bd401033a_0_275) 
+
 ## Coming Soon 
+- Blog Post 
 - Higher accuracy load curve for non-peak season days 
-- Add nuanced weather data 
-- Including more ISOs (PJM will be next)
+- More nuanced weather inputs
+- More ISOs (PJM will be next)
 - Customized amount of peak days targeting based on each utility's ICAP tag 
