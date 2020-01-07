@@ -48,7 +48,7 @@ The most important features were temperature, previous day load and weekend/week
 
 This logistic regression model classifies whether the next day will be a peak load day or not and was tuned to only include the most important features.
 
-# Coefficients
+### Coefficients
 - Temperature: 2.884
 - Saturday: -1.327 
 - Sunday: -1.292 
