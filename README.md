@@ -55,7 +55,7 @@ This logistic regression model classifies whether the next day will be a peak lo
 
 The front end consists of two applications, one for each model, with a Dash app running within a Flask app. The top of the homepage renders the confidence interval from the logistic regression model. It is programmed to provide the response shown below when the probability of a peak load day is under .05%. Otherwise, it will return the percent chance. 
 
-![Coefficients](images/coefficients.png)
+![Sample peak prediction](images/sample_prediction.png)
 
 At the bottom of the homepage, the Flask app renders a Dash app using Plotly to create the load curve. 
 
