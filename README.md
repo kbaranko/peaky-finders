@@ -10,6 +10,7 @@ This peak load forecasting application provides two resources for New York City 
 - Scikit-Learn
 - Flask
 - Dash 
+- Plotly
 
 ## Data
 
