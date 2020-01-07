@@ -48,7 +48,7 @@ The most important features were temperature, previous day load and weekend/week
 
 This logistic regression model classifies whether the next day will be a peak load day or not. It uses a .25 threshold value, rather than the standard .5 in order to be conversative and eliminate false negatives. The model was tuned to only include the most important features, shown in the coefficient table below. 
 
-![Coefficients](images/coefficients.png =358x200)
+![Coefficients](images/coefficients.png)
 
 ![Results](images/confusion_matrix_log.png)
 
