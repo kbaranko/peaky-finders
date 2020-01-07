@@ -75,9 +75,9 @@ At the bottom of the homepage, the Flask app renders a Dash app using Plotly to 
 
 ## Conclusion
 
-Ongoing testing is needed to compare the performance of this XG Boost model for dates that do not fall during peak season. Additionally, these models were trained on actual weather data - testing performance using day-ahead weather forecasts would be helpful to ensure there is no deviance in accuracy. 
+Ongoing testing is needed to compare the performance of this XG Boost model for dates that do not fall during peak season. Additionally, these models were trained on actual weather data - testing performance using day-ahead weather forecasts would be helpful to ensure there is no deviance in accuracy. Reviewing the literature on how best to account for discrepancies in weather measurements throughout different areas of the same ISO territory would help to further improve accuracy. 
 
-Reviewing the literature on how best to account for discrepancies in weather measurements throughout different areas of the same ISO territory would help to further improve accuracy. 
+In practice, the threshold value of .25 for the logistic regression model could be improved by using cost-based classification. It would require working with the building owners relying on this model to calculate the true cost of false positives and false negatives as they relate to their cost of demand response activity, then determining the best cutoff based on these metrics. 
 
 I am looking forward to adding forecasts for other ISOs, continuously improving the models, and adding customized features to calculate ICAP tags. 
 
