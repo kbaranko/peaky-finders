@@ -64,9 +64,13 @@ At the bottom of the homepage, the Flask app renders a Dash app using Plotly to 
 
 ## Conclusion
 
-Ongoing testing is needed to compare the performance of this XG Boost model throughout dates that do not fall in the peak season and using weather forecasts, not actual forecast 
+Ongoing testing is needed to compare the performance of this XG Boost model for dates that do not fall during peak season. Additionally, these models were trained on actual weather data - testing performance using day-ahead weather forecasts would be helpful to ensure there is no deviance in accuracy. 
 
-- Link to [slideshow](https://docs.google.com/presentation/d/1AdA7OE8VJQxQF6DAVs81xLXPfjvnHUb99oBfRkqpB7M/edit#slide=id.g6bd401033a_0_275) 
+Reviewing the literature on how best to account for discrepancies in weather measurements throughout different areas of the same ISO territory would help to further improve accuracy. 
+
+I am looking forward to adding forecasts for other ISOs, continuously improving the models, and adding customized features to calculate ICAP tags. 
+
+Link to [slideshow](https://docs.google.com/presentation/d/1AdA7OE8VJQxQF6DAVs81xLXPfjvnHUb99oBfRkqpB7M/edit#slide=id.g6bd401033a_0_275) 
 
 ## Coming Soon 
 - Blog Post 
