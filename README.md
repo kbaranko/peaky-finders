@@ -13,15 +13,22 @@ This peak load forecasting application provides two resources for New York City 
 
 ## Data
 
-To train the models, I used the PYISO 
+For data collection, I used the PYISO open-source library to scrape hourly electricity load data from the NYISO website and the DarkSky API to gather hourly weather data. The models were trained on peak load seasons from 2013 through 2018 and tested on the 2019 peak load season. I defined a peak load season as the days between June 15 and September 15. 
 
-![Distribution of CO2 Emissions per Capita by Country](images/model_1_target_distribution.png)
+Shown below is the distribution of days and the peak load recorded during that day. 
 
-## Features 
+![Distribution of Summer Days](images/peak_day_distribution.png)
 
 ## Load Curve 
 
+The dataset was framed a supervised learning problem in order to compare the performance of a Regression Tree, Random Forest Regressor, and XG Boost algorithms. XG Boost performed the best with a Root Mean Squared Error (RMSE) of 895.14 Megawatts (MW) for the 2019 peak season. As a benchmark, the official NYISO Forecast had a RMSE of 901.05 MW for the first two weeks of September 2019.
+
+# Features
+
+
 ## Peak Day Confidence Interval 
+
+# Features
 
 ## Front End App
 
