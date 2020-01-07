@@ -46,9 +46,9 @@ The most important features were temperature, previous day load and weekend/week
 
 ## Peak Day Binary Classifier 
 
-This logistic regression model classifies whether the next day will be a peak load day or not and was tuned to only include the most important features.
+This logistic regression model classifies whether the next day will be a peak load day. To account for the sample's disparity in peak (1) and non-peak (0) days, I used the SMOTE algorithm when training the model. The final version was tuned to only include the most important features.
 
-### Coefficients
+### Coefficients used to calculate confidence interval
 - Temperature: 2.884
 - Saturday: -1.327 
 - Sunday: -1.292 
