@@ -46,9 +46,20 @@ The most important features were temperature, previous day load and weekend/week
 
 ## Peak Day Confidence Interval 
 
-This logistic regression model classifies whether the next day will be a peak load day or not. It uses a .25 threshold value, rather than the standard .5 in order to be conversative and eliminate false negatives. The model was tuned to only include the most important features, shown in the coefficient table below. 
+This logistic regression model classifies whether the next day will be a peak load day or not and was tuned to only include the most important features.
 
-![Coefficients](images/coefficients.png)
+# Coefficients
+- Temperature: 2.884
+- Saturday: -1.327 
+- Sunday: -1.292 
+- Holiday (true): -0.74
+- Previous day peak load (t-1): 0.76
+
+The model uses a .25 threshold value, rather than the standard .5 in order to eliminate false negatives. This had the effect of producing the following evaluation metrics:
+- Accuracy: 0.755
+- Recall: 1.00
+- Precision: 0.113
+- ROC / AUC Score: 0.873
 
 ![Results](images/confusion_matrix_log.png)
 
