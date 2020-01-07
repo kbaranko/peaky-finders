@@ -53,6 +53,14 @@ This logistic regression model classifies whether the next day will be a peak lo
 
 ## Front End App
 
+The front end consists of two applications, one for each model, with a Dash app running within a Flask app. The top of the homepage renders the confidence interval from the logistic regression model. It is programmed to provide the response shown below when the probability of a peak load day is under .05%. Otherwise, it will return the percent chance. 
+
+![Coefficients](images/coefficients.png)
+
+At the bottom of the homepage, the Flask app renders a Dash app using Plotly to create the load curve. 
+
+![Sample load curve](images/sample_load_curve.png)
+
 ## Conclusion
 
 Ongoing testing is needed to compare the performance of this XG Boost model throughout dates that do not fall in the peak season and using weather forecasts, not actual forecast 
