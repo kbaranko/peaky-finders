@@ -33,7 +33,7 @@ Shown below is the distribution of days and the peak load recorded during that d
 - Cloud Cover
 
 
-## Load Curve 
+## Forecasted Load Curve
 
 This model was framed as a supervised learning problem in order to compare the performance of a Regression Tree, Random Forest Regressor, and XG Boost algorithms. XG Boost performed the best with a Root Mean Squared Error (RMSE) of 895.14 Megawatts (MW) for the 2019 peak season. The official NYISO day-ahead forecast published on the website had a RMSE of 901.05 MW for the first two weeks of September 2019.
 
@@ -44,7 +44,7 @@ The most important features were temperature, previous day load and weekend/week
 ![XG Boost Feature Importance](images/xg_boost_feature_importance.png)
 
 
-## Peak Day Confidence Interval 
+## Peak Day Binary Classifier 
 
 This logistic regression model classifies whether the next day will be a peak load day or not and was tuned to only include the most important features.
 
