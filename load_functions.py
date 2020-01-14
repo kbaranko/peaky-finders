@@ -336,7 +336,7 @@ def final_forecast(date):
 
 #outputs dictionary with predictions for the next day hourly NYISO load 
 def final_forecast_dict(date):
-    xgb_model_loaded = pickle.load(open('xg_boost_load_model.pkl', "rb"))
+    xgb_model_loaded = pickle.load(open('xg_boost_load_modelV3.pkl', "rb"))
     x_forecast = load_forecast_48hr(pd.datetime.today().strftime('%Y-%m-%d %H'))
     master_df = pd.read_csv('training.csv')
     x_forecast = add_categorical_dummies(x_forecast)

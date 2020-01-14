@@ -158,7 +158,6 @@ def get_features(df):
 
 #after combining csvs, run standardize and get 
 def prep_nyiso_data(df):
-    df = prep_V5(df)
     df = missing_values(df)
     df = get_dummies(df)
     df = standardize(df)
