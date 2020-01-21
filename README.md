@@ -14,7 +14,7 @@ This peak load forecasting application provides two helpful predictions for New 
 
 ## Data
 
-For data collection, I used the PYISO open-source library to scrape hourly electricity load data from the NYISO website and the DarkSky API to gather hourly weather data. The models were trained on peak load seasons from 2013 through 2018 and tested on the 2019 peak load season. I defined a peak load season as the days between June 15 and September 15. Data was cleaned and categorical variables one-hot encoded. 
+For data collection, I used the PYISO open-source library to scrape hourly electricity load data from the NYISO website and the DarkSky API to gather hourly weather data. The binary classifier model weas trained on peak load seasons from 2013 through 2018 and tested on the 2019 peak load season. The load curve regression model was trained on ISO load data from 2016 through 2019 (four years) and tested using train-test split. I defined a peak load season as the days between June 15 and September 15. Data was cleaned and categorical variables one-hot encoded. 
 
 Shown below is the distribution of days and the peak load recorded during that day. 
 
