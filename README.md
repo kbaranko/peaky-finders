@@ -85,7 +85,6 @@ Link to [slideshow](https://docs.google.com/presentation/d/1AdA7OE8VJQxQF6DAVs81
 
 ## Coming Soon 
 - Blog Post 
-- Higher accuracy load curve for non-peak season days 
 - More nuanced weather inputs
 - More ISOs (PJM will be next)
 - Customized amount of peak days targeting based on each utility's ICAP tag 
