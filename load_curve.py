@@ -22,32 +22,24 @@ layout = dict(title="Projected Load Curve", showlegend=True)
 
 fig = dict(data=data, layout=layout)
 
-app = dash.Dash()
+app = dash.Dash(__name__, static_folder='static')
 
 app.layout = html.Div([
-    html.Label('NYISO Forecasts'),
+    
+    html.Div(
+        html.Img(src='/Users/kylebaranko/Final_Project/peaky_flask/peaky-finders/static/Logo-1.14.20-TW.png'), 
+        className='banner'),
+
     html.Div(
         dcc.Graph(id="Load Curve",
-                    figure=fig)
-    ),
-    html.Label('Historical Data'),
-    html.Div( 
-        dcc.Input(
-            id='historical data',
-            placeholder='Enter a date range',
-            type='text',
-            value=''
-        )
-    ),
-    html.Div(
-        dcc.Dropdown(
-            options=[
-                {'label': 'Candelstick', 'value':'Candelstick'},
-                {'label': 'Line', 'value':'Line'}
-            ]
-        )
+                    figure=fig),
     )
 ])
+
+# app.css.append_css({
+
+#     "external_url: http://codepen.io/chriddyp/pen/bWLwgP.css"
+# })
 
 #if the file name assignmed is main, then we'll actually run our server 
 if __name__ == '__main__':
