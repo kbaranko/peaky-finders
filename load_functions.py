@@ -20,7 +20,7 @@ def format_datetime(row):
     return row 
 
 #gets load info for nyiso  
-def previous_2days_load():
+def previous_7days_load():
     nyiso = client_factory('NYISO', timeout_seconds=60)
     begin = (dt.datetime.today() - timedelta(7)).strftime('%Y-%m-%d %H')
     end = pd.datetime.today().strftime('%Y-%m-%d %H')

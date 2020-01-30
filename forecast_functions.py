@@ -347,4 +347,45 @@ def final_forecast_dict(date):
     forecast = forecast.to_dict()
     forecast = forecast['Predicted Load']
     return forecast 
+
+
+#######
+
+#start of functions that will gather historical forecast information for the past 7 days, make predictions, and calculate the RMSE of the last 7 days
+def get_nyc_weather_data_for_date(datetime_string, verbose=True):
+    api_key = config.api_key
+    nyc_lat = "40.7128"
+    nyc_long = "-73.935242"
+    url_base = "https://api.darksky.net/forecast"
+    exclude = 'flags,minutely,alerts,daily'    
+    year, month, day = format_datetime(datetime_string)
+        
+    datetime = "{}-{}-{}T00:00:00".format(year, month, day)
+    full_url = "{}/{}/{},{},{}?exclude={}".format(url_base, api_key, 
+                                                     nyc_lat, nyc_long, 
+                                                     datetime, exclude)
+    response = requests.get(full_url)
+    if response.status_code == 200:
+        if verbose:
+            print(response.status_code)
+        return response, datetime_string
+    else: 
+        raise ValueError("Error getting data from DarkSky API: Response Code {}".format(response.status_code))
+    return datetime_string, response
+
+
+
+
+def get_historical_weather():
+    start = (dt.datetime.today() - timedelta(7)).strftime('%Y-%m-%d %H')
+    datelist = pd.date_range(start, periods=7).tolist()
+    dates = []
+    for date in datelist:
+        date = str(date)
+        date = date[:10]
+        dates.append(date)
+    for date in dates:
+        response, date = get_nyc_weather_data_for_date(datea, verbose=True)
+        info = response.json()
+    return dates
     
