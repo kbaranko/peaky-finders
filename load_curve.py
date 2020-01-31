@@ -12,7 +12,8 @@ from assets import *
 
 
 df = final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H')) 
-df_1 = previous_7days_load()
+#df_1 = previous_7days_load()
+df_1 = get_7day_forecast()
 
 plot_forecast = go.Scatter(x=list(df.index),
                             y=list(df['Predicted Load']),
