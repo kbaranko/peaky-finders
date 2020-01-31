@@ -373,7 +373,36 @@ def get_nyc_weather_data_for_date(datetime_string, verbose=True):
         raise ValueError("Error getting data from DarkSky API: Response Code {}".format(response.status_code))
     return datetime_string, response
 
+def format_date_A(datetime_string):
+    year = datetime_string[:4]
+    month = datetime_string[5:7]
+    day = datetime_string[8:10]
+    return year, month, day
 
+def findDay_A(date): 
+    day = dt.datetime.strptime(date, '%Y-%m-%d %H').weekday() 
+    return (calendar.day_name[day]) 
+    
+def get_nyc_weather_data_for_date(datetime_string, verbose=True):
+    api_key = config.api_key
+    nyc_lat = "40.7128"
+    nyc_long = "-73.935242"
+    url_base = "https://api.darksky.net/forecast"
+    exclude = 'flags,minutely,alerts,daily'    
+    year, month, day = format_date_A(datetime_string)
+        
+    datetime = "{}-{}-{}T00:00:00".format(year, month, day)
+    full_url = "{}/{}/{},{},{}?exclude={}".format(url_base, api_key, 
+                                                     nyc_lat, nyc_long, 
+                                                     datetime, exclude)
+    response = requests.get(full_url)
+    if response.status_code == 200:
+        if verbose:
+            print(response.status_code)
+        return response, datetime_string
+    else: 
+        raise ValueError("Error getting data from DarkSky API: Response Code {}".format(response.status_code))
+    return datetime_string, response
 
 
 def get_7day_forecast():
@@ -443,7 +472,7 @@ def get_7day_forecast():
     ## load model
     xgb_model_loaded = pickle.load(open('xg_boost_load_modelV3.pkl', "rb"))
     master_df = pd.read_csv('training.csv')
-    x_forecast = add_categorical_dummies(x_result)
+    result = add_categorical_dummies(result)
     x = standardize_data(result, master_df)
     predictions = xgb_model_loaded.predict(x)
     df_pred = pd.DataFrame(predictions)

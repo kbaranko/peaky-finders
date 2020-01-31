@@ -19,6 +19,9 @@ def format_datetime(row):
     row['timestamp'] = datetime_string
     return row 
 
+
+    
+
 #gets load info for nyiso  
 def previous_7days_load():
     nyiso = client_factory('NYISO', timeout_seconds=60)

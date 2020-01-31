@@ -12,8 +12,9 @@ from assets import *
 
 
 df = final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H')) 
-#df_1 = previous_7days_load()
-df_1 = get_7day_forecast()
+df_load = previous_7days_load()
+df_predictions = get_7day_forecast()
+df_1 = pd.concat([df_load , df_predictions], axis=1)
 
 plot_forecast = go.Scatter(x=list(df.index),
                             y=list(df['Predicted Load']),
@@ -22,7 +23,7 @@ plot_forecast = go.Scatter(x=list(df.index),
 )
 
 plot_historical = go.Scatter(x=list(df_1.index),
-                            y=list(df_1['load_MW']),
+                            y=list(df_1['load_MW'], df_1['Predicted Load']),
                             name="Historical",
                             line=dict(color="#43d9de")
 )
