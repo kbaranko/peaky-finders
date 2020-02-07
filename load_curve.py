@@ -14,8 +14,6 @@ from assets import *
 df = final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H')) 
 df_load = previous_7days_load()
 df_predictions = get_7day_forecast()
-# df_1 = pd.concat([df_load , df_predictions], axis=1)
-# df_1
 
 plot_forecast = go.Scatter(x=list(df.index),
                             y=list(df['Predicted Load']),
@@ -37,14 +35,6 @@ layout_1 = dict(title="7-Day Historical Load Curve", showlegend=True)
 
 fig = dict(data=data, layout=layout)
 fig_1 = dict(data=data_1, layout=layout_1)
-
-
-# fig_1 = go.Figure()
-# # Create and style traces
-# fig_1.add_trace(go.Scatter(x=df_1.index, y=df_1['load_MW'], name='Actual Load',
-#                          line=dict(color='firebrick', width=4)))
-# fig_1.add_trace(go.Scatter(x=df_1.index, y=df_1['Predicted Load'], name = 'Predicted Load',
-#                          line=dict(color='royalblue', width=4)))
 
 app = dash.Dash(__name__)
 
