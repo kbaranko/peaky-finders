@@ -484,11 +484,16 @@ def get_7day_forecast():
     result = result.drop(['weekday', 'hour', 'holiday'], axis=1)
     result = pd.concat([result, day_dummies, hour_dummies, holiday_dummies], axis=1)
     ## load model
-    xgb_model_loaded = pickle.load(open('xg_boost_load_model.pkl', "rb"))
+    xgb_model_loaded = pickle.load(open('xg_boost_load_modelV3.pkl', "rb"))
     master_df = pd.read_csv('training.csv')
     result = add_categorical_dummies(result)
     x = standardize_data_7(result, master_df)
+    x = x[['temperature', 'humidity', 'cloudcover', 'uvindex', 'load (t-24)', 'first seasonal difference', 'prev-day-hour-Std', 'prev-day-hour-MA', 'day_Monday', 'day_Saturday', 'day_Sunday', 'day_Thursday', 'day_Tuesday', 'day_Wednesday', 'hour_1.0', 'hour_2.0', 'hour_3.0', 'hour_4.0', 'hour_5.0', 'hour_6.0', 'hour_7.0', 'hour_8.0', 'hour_9.0', 'hour_10.0', 'hour_11.0', 'hour_12.0', 'hour_13.0', 'hour_14.0', 'hour_15.0', 'hour_16.0', 'hour_17.0', 'hour_18.0', 'hour_19.0', 'hour_20.0', 'hour_21.0', 'hour_22.0', 'hour_23.0', 'holiday_1.0']]
     predictions = xgb_model_loaded.predict(x)
+    x = x.reset_index()
     df_pred = pd.DataFrame(predictions)
     df_pred.columns = ['Predicted Load']
-    return df_pred
+    df_total = pd.concat([x, df_pred], axis=1)
+    df_total = df_total.set_index('timestamp')
+    df_total = df_total['Predicted Load']
+    return df_total
