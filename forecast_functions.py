@@ -404,6 +404,20 @@ def get_nyc_weather_data_for_date(datetime_string, verbose=True):
         raise ValueError("Error getting data from DarkSky API: Response Code {}".format(response.status_code))
     return datetime_string, response
 
+def standardize_data_7(df, master_df):
+    df = df[['cloudcover', 'first seasonal difference', 'humidity', 'load (t-24)', 'prev-day-hour-MA', 'prev-day-hour-Std', 'temperature', 'uvindex', 'day_Monday', 'day_Saturday', 'day_Sunday', 'day_Thursday', 'day_Tuesday', 'day_Wednesday', 'hour_1.0', 'hour_2.0', 'hour_3.0', 'hour_4.0', 'hour_5.0', 'hour_6.0', 'hour_7.0', 'hour_8.0', 'hour_9.0', 'hour_10.0', 'hour_11.0', 'hour_12.0', 'hour_13.0', 'hour_14.0', 'hour_15.0', 'hour_16.0', 'hour_17.0', 'hour_18.0', 'hour_19.0', 'hour_20.0', 'hour_21.0', 'hour_22.0', 'hour_23.0', 'holiday_1.0']]
+    master_df['timestamp'] = pd.to_datetime(master_df['timestamp'], format='%Y-%m-%d %H:%M')
+    master_df = master_df.set_index('timestamp')
+    master_df = master_df.drop('load_MW', 1)
+    df_combo = [master_df, df]
+    df_combo = pd.concat(df_combo)
+    df_combo['temperature'] = (df_combo['temperature'] - np.mean(df_combo['temperature'])) / np.sqrt(np.var(df_combo['temperature']))
+    df_combo['load (t-24)'] = (df_combo['load (t-24)'] - np.mean(df_combo['load (t-24)'])) / np.sqrt(np.var(df_combo['load (t-24)']))
+    df_combo['first seasonal difference'] = (df_combo['first seasonal difference'] - np.mean(df_combo['first seasonal difference'])) / np.sqrt(np.var(df_combo['first seasonal difference']))
+    df_combo['prev-day-hour-Std'] = (df_combo['prev-day-hour-Std'] - np.mean(df_combo['prev-day-hour-Std'])) / np.sqrt(np.var(df_combo['prev-day-hour-Std']))
+    df_combo['prev-day-hour-MA'] = (df_combo['prev-day-hour-MA'] - np.mean(df_combo['prev-day-hour-MA'])) / np.sqrt(np.var(df_combo['prev-day-hour-MA']))
+    return df
+
 
 def get_7day_forecast():
     start = (dt.datetime.today() - timedelta(7)).strftime('%Y-%m-%d %H')
@@ -469,21 +483,12 @@ def get_7day_forecast():
     holiday_dummies = pd.get_dummies(result['holiday'], prefix='holiday', drop_first=True)
     result = result.drop(['weekday', 'hour', 'holiday'], axis=1)
     result = pd.concat([result, day_dummies, hour_dummies, holiday_dummies], axis=1)
-    result.columns = ['cloudcover', 'first seasonal difference', 'humidity', 'load (t-24)',
-       'prev-day-hour-MA', 'prev-day-hour-Std', 'temperature', 'uvindex',
-       'day_Monday', 'day_Saturday', 'day_Sunday', 'day_Thursday',
-       'day_Tuesday', 'day_Wednesday', 'hour_1.0', 'hour_2.0', 'hour_3.0',
-       'hour_4.0', 'hour_5.0', 'hour_6.0', 'hour_7.0', 'hour_8.0', 'hour_9.0',
-       'hour_10.0', 'hour_11.0', 'hour_12.0', 'hour_13.0', 'hour_14.0',
-       'hour_15.0', 'hour_16.0', 'hour_17.0', 'hour_18.0', 'hour_19.0',
-       'hour_20.0', 'hour_21.0', 'hour_22.0', 'hour_23.0', 'holiday_1.0']
     ## load model
-    xgb_model_loaded = pickle.load(open('xg_boost_load_modelV3.pkl', "rb"))
+    xgb_model_loaded = pickle.load(open('xg_boost_load_model.pkl', "rb"))
     master_df = pd.read_csv('training.csv')
     result = add_categorical_dummies(result)
-    x = standardize_data(result, master_df)
+    x = standardize_data_7(result, master_df)
     predictions = xgb_model_loaded.predict(x)
     df_pred = pd.DataFrame(predictions)
-    forecast = prepare_predictions(predictions, x)
-    forecast = forecast.to_dict()
-    return forecast
+    df_pred.columns = ['Predicted Load']
+    return df_pred
