@@ -335,165 +335,165 @@ def final_forecast(date):
     return forecast 
 
 #outputs dictionary with predictions for the next day hourly NYISO load 
-def final_forecast_dict(date):
-    xgb_model_loaded = pickle.load(open('xg_boost_load_modelV3.pkl', "rb"))
-    x_forecast = load_forecast_48hr(pd.datetime.today().strftime('%Y-%m-%d %H'))
-    master_df = pd.read_csv('training.csv')
-    x_forecast = add_categorical_dummies(x_forecast)
-    x = standardize_data(x_forecast, master_df)
-    predictions = xgb_model_loaded.predict(x)
-    df_pred = pd.DataFrame(predictions)
-    forecast = prepare_predictions(predictions, x)
-    forecast = forecast.to_dict()
-    forecast = forecast['Predicted Load']
-    return forecast 
+# def final_forecast_dict(date):
+#     xgb_model_loaded = pickle.load(open('xg_boost_load_modelV3.pkl', "rb"))
+#     x_forecast = load_forecast_48hr(pd.datetime.today().strftime('%Y-%m-%d %H'))
+#     master_df = pd.read_csv('training.csv')
+#     x_forecast = add_categorical_dummies(x_forecast)
+#     x = standardize_data(x_forecast, master_df)
+#     predictions = xgb_model_loaded.predict(x)
+#     df_pred = pd.DataFrame(predictions)
+#     forecast = prepare_predictions(predictions, x)
+#     forecast = forecast.to_dict()
+#     forecast = forecast['Predicted Load']
+#     return forecast 
 
 
-#######
+# #######
 
-#start of functions that will gather historical forecast information for the past 7 days, make predictions, and calculate the RMSE of the last 7 days
-def get_nyc_weather_data_for_date(datetime_string, verbose=True):
-    api_key = config.api_key
-    nyc_lat = "40.7128"
-    nyc_long = "-73.935242"
-    url_base = "https://api.darksky.net/forecast"
-    exclude = 'flags,minutely,alerts,daily'    
-    year, month, day = format_date_A(datetime_string)
+# #functions that will gather historical forecast information for the past 7 days, make predictions, and calculate the RMSE of the last 7 days
+# def get_nyc_weather_data_for_date(datetime_string, verbose=True):
+#     api_key = config.api_key
+#     nyc_lat = "40.7128"
+#     nyc_long = "-73.935242"
+#     url_base = "https://api.darksky.net/forecast"
+#     exclude = 'flags,minutely,alerts,daily'    
+#     year, month, day = format_date_A(datetime_string)
         
-    datetime = "{}-{}-{}T00:00:00".format(year, month, day)
-    full_url = "{}/{}/{},{},{}?exclude={}".format(url_base, api_key, 
-                                                     nyc_lat, nyc_long, 
-                                                     datetime, exclude)
-    response = requests.get(full_url)
-    if response.status_code == 200:
-        if verbose:
-            print(response.status_code)
-        return response, datetime_string
-    else: 
-        raise ValueError("Error getting data from DarkSky API: Response Code {}".format(response.status_code))
-    return datetime_string, response
+#     datetime = "{}-{}-{}T00:00:00".format(year, month, day)
+#     full_url = "{}/{}/{},{},{}?exclude={}".format(url_base, api_key, 
+#                                                      nyc_lat, nyc_long, 
+#                                                      datetime, exclude)
+#     response = requests.get(full_url)
+#     if response.status_code == 200:
+#         if verbose:
+#             print(response.status_code)
+#         return response, datetime_string
+#     else: 
+#         raise ValueError("Error getting data from DarkSky API: Response Code {}".format(response.status_code))
+#     return datetime_string, response
 
-def format_date_A(datetime_string):
-    year = datetime_string[:4]
-    month = datetime_string[5:7]
-    day = datetime_string[8:10]
-    return year, month, day
+# def format_date_A(datetime_string):
+#     year = datetime_string[:4]
+#     month = datetime_string[5:7]
+#     day = datetime_string[8:10]
+#     return year, month, day
 
-def findDay_A(date): 
-    day = dt.datetime.strptime(date, '%Y-%m-%d %H').weekday() 
-    return (calendar.day_name[day]) 
+# def findDay_A(date): 
+#     day = dt.datetime.strptime(date, '%Y-%m-%d %H').weekday() 
+#     return (calendar.day_name[day]) 
     
-def get_nyc_weather_data_for_date(datetime_string, verbose=True):
-    api_key = config.api_key
-    nyc_lat = "40.7128"
-    nyc_long = "-73.935242"
-    url_base = "https://api.darksky.net/forecast"
-    exclude = 'flags,minutely,alerts,daily'    
-    year, month, day = format_date_A(datetime_string)
+# def get_nyc_weather_data_for_date(datetime_string, verbose=True):
+#     api_key = config.api_key
+#     nyc_lat = "40.7128"
+#     nyc_long = "-73.935242"
+#     url_base = "https://api.darksky.net/forecast"
+#     exclude = 'flags,minutely,alerts,daily'    
+#     year, month, day = format_date_A(datetime_string)
         
-    datetime = "{}-{}-{}T00:00:00".format(year, month, day)
-    full_url = "{}/{}/{},{},{}?exclude={}".format(url_base, api_key, 
-                                                     nyc_lat, nyc_long, 
-                                                     datetime, exclude)
-    response = requests.get(full_url)
-    if response.status_code == 200:
-        if verbose:
-            print(response.status_code)
-        return response, datetime_string
-    else: 
-        raise ValueError("Error getting data from DarkSky API: Response Code {}".format(response.status_code))
-    return datetime_string, response
+#     datetime = "{}-{}-{}T00:00:00".format(year, month, day)
+#     full_url = "{}/{}/{},{},{}?exclude={}".format(url_base, api_key, 
+#                                                      nyc_lat, nyc_long, 
+#                                                      datetime, exclude)
+#     response = requests.get(full_url)
+#     if response.status_code == 200:
+#         if verbose:
+#             print(response.status_code)
+#         return response, datetime_string
+#     else: 
+#         raise ValueError("Error getting data from DarkSky API: Response Code {}".format(response.status_code))
+#     return datetime_string, response
 
-def standardize_data_7(df, master_df):
-    df = df[['cloudcover', 'first seasonal difference', 'humidity', 'load (t-24)', 'prev-day-hour-MA', 'prev-day-hour-Std', 'temperature', 'uvindex', 'day_Monday', 'day_Saturday', 'day_Sunday', 'day_Thursday', 'day_Tuesday', 'day_Wednesday', 'hour_1.0', 'hour_2.0', 'hour_3.0', 'hour_4.0', 'hour_5.0', 'hour_6.0', 'hour_7.0', 'hour_8.0', 'hour_9.0', 'hour_10.0', 'hour_11.0', 'hour_12.0', 'hour_13.0', 'hour_14.0', 'hour_15.0', 'hour_16.0', 'hour_17.0', 'hour_18.0', 'hour_19.0', 'hour_20.0', 'hour_21.0', 'hour_22.0', 'hour_23.0', 'holiday_1.0']]
-    master_df['timestamp'] = pd.to_datetime(master_df['timestamp'], format='%Y-%m-%d %H:%M')
-    master_df = master_df.set_index('timestamp')
-    master_df = master_df.drop('load_MW', 1)
-    df_combo = [master_df, df]
-    df_combo = pd.concat(df_combo)
-    df_combo['temperature'] = (df_combo['temperature'] - np.mean(df_combo['temperature'])) / np.sqrt(np.var(df_combo['temperature']))
-    df_combo['load (t-24)'] = (df_combo['load (t-24)'] - np.mean(df_combo['load (t-24)'])) / np.sqrt(np.var(df_combo['load (t-24)']))
-    df_combo['first seasonal difference'] = (df_combo['first seasonal difference'] - np.mean(df_combo['first seasonal difference'])) / np.sqrt(np.var(df_combo['first seasonal difference']))
-    df_combo['prev-day-hour-Std'] = (df_combo['prev-day-hour-Std'] - np.mean(df_combo['prev-day-hour-Std'])) / np.sqrt(np.var(df_combo['prev-day-hour-Std']))
-    df_combo['prev-day-hour-MA'] = (df_combo['prev-day-hour-MA'] - np.mean(df_combo['prev-day-hour-MA'])) / np.sqrt(np.var(df_combo['prev-day-hour-MA']))
-    return df
+# def standardize_data_7(df, master_df):
+#     df = df[['cloudcover', 'first seasonal difference', 'humidity', 'load (t-24)', 'prev-day-hour-MA', 'prev-day-hour-Std', 'temperature', 'uvindex', 'day_Monday', 'day_Saturday', 'day_Sunday', 'day_Thursday', 'day_Tuesday', 'day_Wednesday', 'hour_1.0', 'hour_2.0', 'hour_3.0', 'hour_4.0', 'hour_5.0', 'hour_6.0', 'hour_7.0', 'hour_8.0', 'hour_9.0', 'hour_10.0', 'hour_11.0', 'hour_12.0', 'hour_13.0', 'hour_14.0', 'hour_15.0', 'hour_16.0', 'hour_17.0', 'hour_18.0', 'hour_19.0', 'hour_20.0', 'hour_21.0', 'hour_22.0', 'hour_23.0', 'holiday_1.0']]
+#     master_df['timestamp'] = pd.to_datetime(master_df['timestamp'], format='%Y-%m-%d %H:%M')
+#     master_df = master_df.set_index('timestamp')
+#     master_df = master_df.drop('load_MW', 1)
+#     df_combo = [master_df, df]
+#     df_combo = pd.concat(df_combo)
+#     df_combo['temperature'] = (df_combo['temperature'] - np.mean(df_combo['temperature'])) / np.sqrt(np.var(df_combo['temperature']))
+#     df_combo['load (t-24)'] = (df_combo['load (t-24)'] - np.mean(df_combo['load (t-24)'])) / np.sqrt(np.var(df_combo['load (t-24)']))
+#     df_combo['first seasonal difference'] = (df_combo['first seasonal difference'] - np.mean(df_combo['first seasonal difference'])) / np.sqrt(np.var(df_combo['first seasonal difference']))
+#     df_combo['prev-day-hour-Std'] = (df_combo['prev-day-hour-Std'] - np.mean(df_combo['prev-day-hour-Std'])) / np.sqrt(np.var(df_combo['prev-day-hour-Std']))
+#     df_combo['prev-day-hour-MA'] = (df_combo['prev-day-hour-MA'] - np.mean(df_combo['prev-day-hour-MA'])) / np.sqrt(np.var(df_combo['prev-day-hour-MA']))
+#     return df
 
 
-def get_7day_forecast():
-    start = (dt.datetime.today() - timedelta(7)).strftime('%Y-%m-%d %H')
-    datelist = pd.date_range(start, periods=7).tolist()
-    dates = []
-    for date in datelist:
-        date = str(date)
-        date = date[:10]
-        dates.append(date)
-    total = []
-    for date in dates:
-        response, date = get_nyc_weather_data_for_date(date, verbose=True)
-        info = response.json()
-        hourly = info['hourly']
-        hourly = hourly['data']
-        forecasts = []
-        for i in list(range(len(hourly))):
-            dic = hourly[i] 
-            t = dic['time']
-            t = str(t)
-            t = (pd.to_datetime(t, unit='s'))
-            d = str(t)
-            d = d[:-6]
-            weekday = findDay_A(d)
-            holiday = is_holiday(d)
-            hour = d[11:13]
-            hour = format_hour(hour)
-            temp = dic['temperature']
-            humidity =  dic['humidity'] 
-            cloudcover = dic['cloudCover']
-            uvindex = dic['uvIndex']
-            forecasts.append(tuple([t, temp, humidity, cloudcover, uvindex, weekday, hour, holiday]))
-        forecasts = pd.DataFrame(forecasts)
-        forecasts.columns = ['timestamp', 'temperature', 'humidity', 'cloudcover', 'uvindex', 'weekday', 'hour', 'holiday']
-        total.append(forecasts)
-    df = pd.concat(total)
-    #gather load data
-    nyiso = client_factory('NYISO', timeout_seconds=60)
-    begin = (dt.datetime.today() - timedelta(8)).strftime('%Y-%m-%d %H')
-    end = pd.datetime.today().strftime('%Y-%m-%d %H')
-    df_1 = nyiso.get_load(latest=False, yesterday=False, start_at=begin, end_at=end)
-    df_1 = pd.DataFrame(df_1)
-    df_1 = df_1[['load_MW', 'timestamp']]
-    df_1 = df_1.set_index('timestamp')
-    #df_1.index = df.index.tz_convert('US/Eastern')
-    df_1 = df_1.resample('H').max()
-    df_1 = df_1.reset_index()
-    df_1 = df_1.apply(format_datetime, axis=1)
-    df_1['timestamp'] = pd.to_datetime(df_1['timestamp'], format='%Y-%m-%d %H:%M')
-    df_1 = df_1.set_index('timestamp')
-    df_1 = prep_V5(df_1)
-    df_1 = df_1[['load (t-24)', 'first seasonal difference', 'prev-day-hour-Std', 'prev-day-hour-MA']]
-    df_1 = df_1.dropna(axis = 0, how ='any')
-    df_1 = df_1.reset_index()
-    result = pd.merge(df_1,
-                 df,
-                 on='timestamp', 
-                 how='left')
-    result = result.dropna(axis = 0, how ='any')
-    result = result.set_index('timestamp')
-    day_dummies = pd.get_dummies(result['weekday'], prefix='day', drop_first=True)
-    hour_dummies = pd.get_dummies(result['hour'], prefix='hour', drop_first=True)
-    holiday_dummies = pd.get_dummies(result['holiday'], prefix='holiday', drop_first=True)
-    result = result.drop(['weekday', 'hour', 'holiday'], axis=1)
-    result = pd.concat([result, day_dummies, hour_dummies, holiday_dummies], axis=1)
-    ## load model
-    xgb_model_loaded = pickle.load(open('xg_boost_load_modelV3.pkl', "rb"))
-    master_df = pd.read_csv('training.csv')
-    result = add_categorical_dummies(result)
-    x = standardize_data_7(result, master_df)
-    x = x[['temperature', 'humidity', 'cloudcover', 'uvindex', 'load (t-24)', 'first seasonal difference', 'prev-day-hour-Std', 'prev-day-hour-MA', 'day_Monday', 'day_Saturday', 'day_Sunday', 'day_Thursday', 'day_Tuesday', 'day_Wednesday', 'hour_1.0', 'hour_2.0', 'hour_3.0', 'hour_4.0', 'hour_5.0', 'hour_6.0', 'hour_7.0', 'hour_8.0', 'hour_9.0', 'hour_10.0', 'hour_11.0', 'hour_12.0', 'hour_13.0', 'hour_14.0', 'hour_15.0', 'hour_16.0', 'hour_17.0', 'hour_18.0', 'hour_19.0', 'hour_20.0', 'hour_21.0', 'hour_22.0', 'hour_23.0', 'holiday_1.0']]
-    predictions = xgb_model_loaded.predict(x)
-    x = x.reset_index()
-    df_pred = pd.DataFrame(predictions)
-    df_pred.columns = ['Predicted Load']
-    df_total = pd.concat([x, df_pred], axis=1)
-    df_total = df_total.set_index('timestamp')
-    df_total = df_total['Predicted Load']
-    return df_total
+# def get_7day_forecast():
+#     start = (dt.datetime.today() - timedelta(7)).strftime('%Y-%m-%d %H')
+#     datelist = pd.date_range(start, periods=7).tolist()
+#     dates = []
+#     for date in datelist:
+#         date = str(date)
+#         date = date[:10]
+#         dates.append(date)
+#     total = []
+#     for date in dates:
+#         response, date = get_nyc_weather_data_for_date(date, verbose=True)
+#         info = response.json()
+#         hourly = info['hourly']
+#         hourly = hourly['data']
+#         forecasts = []
+#         for i in list(range(len(hourly))):
+#             dic = hourly[i] 
+#             t = dic['time']
+#             t = str(t)
+#             t = (pd.to_datetime(t, unit='s'))
+#             d = str(t)
+#             d = d[:-6]
+#             weekday = findDay_A(d)
+#             holiday = is_holiday(d)
+#             hour = d[11:13]
+#             hour = format_hour(hour)
+#             temp = dic['temperature']
+#             humidity =  dic['humidity'] 
+#             cloudcover = dic['cloudCover']
+#             uvindex = dic['uvIndex']
+#             forecasts.append(tuple([t, temp, humidity, cloudcover, uvindex, weekday, hour, holiday]))
+#         forecasts = pd.DataFrame(forecasts)
+#         forecasts.columns = ['timestamp', 'temperature', 'humidity', 'cloudcover', 'uvindex', 'weekday', 'hour', 'holiday']
+#         total.append(forecasts)
+#     df = pd.concat(total)
+#     #gather load data
+#     nyiso = client_factory('NYISO', timeout_seconds=60)
+#     begin = (dt.datetime.today() - timedelta(8)).strftime('%Y-%m-%d %H')
+#     end = pd.datetime.today().strftime('%Y-%m-%d %H')
+#     df_1 = nyiso.get_load(latest=False, yesterday=False, start_at=begin, end_at=end)
+#     df_1 = pd.DataFrame(df_1)
+#     df_1 = df_1[['load_MW', 'timestamp']]
+#     df_1 = df_1.set_index('timestamp')
+#     #df_1.index = df.index.tz_convert('US/Eastern')
+#     df_1 = df_1.resample('H').max()
+#     df_1 = df_1.reset_index()
+#     df_1 = df_1.apply(format_datetime, axis=1)
+#     df_1['timestamp'] = pd.to_datetime(df_1['timestamp'], format='%Y-%m-%d %H:%M')
+#     df_1 = df_1.set_index('timestamp')
+#     df_1 = prep_V5(df_1)
+#     df_1 = df_1[['load (t-24)', 'first seasonal difference', 'prev-day-hour-Std', 'prev-day-hour-MA']]
+#     df_1 = df_1.dropna(axis = 0, how ='any')
+#     df_1 = df_1.reset_index()
+#     result = pd.merge(df_1,
+#                  df,
+#                  on='timestamp', 
+#                  how='left')
+#     result = result.dropna(axis = 0, how ='any')
+#     result = result.set_index('timestamp')
+#     day_dummies = pd.get_dummies(result['weekday'], prefix='day', drop_first=True)
+#     hour_dummies = pd.get_dummies(result['hour'], prefix='hour', drop_first=True)
+#     holiday_dummies = pd.get_dummies(result['holiday'], prefix='holiday', drop_first=True)
+#     result = result.drop(['weekday', 'hour', 'holiday'], axis=1)
+#     result = pd.concat([result, day_dummies, hour_dummies, holiday_dummies], axis=1)
+#     ## load model
+#     xgb_model_loaded = pickle.load(open('xg_boost_load_modelV3.pkl', "rb"))
+#     master_df = pd.read_csv('training.csv')
+#     result = add_categorical_dummies(result)
+#     x = standardize_data_7(result, master_df)
+#     x = x[['temperature', 'humidity', 'cloudcover', 'uvindex', 'load (t-24)', 'first seasonal difference', 'prev-day-hour-Std', 'prev-day-hour-MA', 'day_Monday', 'day_Saturday', 'day_Sunday', 'day_Thursday', 'day_Tuesday', 'day_Wednesday', 'hour_1.0', 'hour_2.0', 'hour_3.0', 'hour_4.0', 'hour_5.0', 'hour_6.0', 'hour_7.0', 'hour_8.0', 'hour_9.0', 'hour_10.0', 'hour_11.0', 'hour_12.0', 'hour_13.0', 'hour_14.0', 'hour_15.0', 'hour_16.0', 'hour_17.0', 'hour_18.0', 'hour_19.0', 'hour_20.0', 'hour_21.0', 'hour_22.0', 'hour_23.0', 'holiday_1.0']]
+#     predictions = xgb_model_loaded.predict(x)
+#     x = x.reset_index()
+#     df_pred = pd.DataFrame(predictions)
+#     df_pred.columns = ['Predicted Load']
+#     df_total = pd.concat([x, df_pred], axis=1)
+#     df_total = df_total.set_index('timestamp')
+#     df_total = df_total['Predicted Load']
+#     return df_total
