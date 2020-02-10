@@ -351,3 +351,5 @@ def final_forecast_dict(date):
 
 if __name__ == '__main__':
     print('forecast functions imported')
+else: 
+    print('forecast functions is being imported into another module')

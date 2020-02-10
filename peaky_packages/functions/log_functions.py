@@ -218,3 +218,5 @@ def return_values(date):
 
 if __name__ == '__main__':
     print('log functions imported')
+else:
+    print('log functions is being imported into another module')
