@@ -13,6 +13,9 @@ from datetime import date, timedelta
 import pickle 
 import math 
 
+
+#script will only work if 1. config.py file is in main program directory that is importing this module and 2. pkl file is in main program directory to run model
+
 us_holidays = holidays.UnitedStates()
 def is_holiday(day):
     if day in us_holidays:

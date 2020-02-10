@@ -12,6 +12,8 @@ import holidays
 from datetime import date, timedelta
 import pickle 
 
+#script will only work if 1. config.py file is in main program directory that is importing this module and 2. pkl file is in main program directory to run model
+
 #gets current weather information from darksky api 
 def get_current_weather(datetime):
     api_key = config.api_key
