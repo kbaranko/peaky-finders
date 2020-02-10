@@ -5,14 +5,13 @@ import pandas as pd
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 import dash_gif_component as Gif
-from load_functions import * 
-from forecast_functions import *
+from peaky_packages.functions import load_functions, forecast_functions
 from assets import *
 
 
 
-df = final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H')) 
-df_load = previous_7days_load()
+df = forecast_functions.final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H')) 
+df_load = load_functions.previous_7days_load()
 
 plot_forecast = go.Scatter(x=list(df.index),
                             y=list(df['Predicted Load']),

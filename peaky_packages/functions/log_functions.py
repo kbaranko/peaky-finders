@@ -213,3 +213,8 @@ def return_values(date):
     elif p > .05:
         answer = 'there is' + p + 'percent chance tomorrow will be a peak load day.'
     return answer 
+
+
+
+if __name__ == '__main__':
+    print('log functions imported')

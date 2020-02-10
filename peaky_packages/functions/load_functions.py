@@ -40,3 +40,6 @@ def previous_7days_load():
     return df 
 
 
+
+if __name__ == '__main__':
+    print('load functions imported')
