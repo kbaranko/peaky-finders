@@ -5,8 +5,8 @@ import pandas as pd
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 import dash_gif_component as Gif
-from peaky_packages.functions import load_functions, forecast_functions, log_functions
-from log_functions import return_values
+from peaky_packages.functions import load_functions, forecast_functions
+from peaky_packages.functions.log_functions import *
 from assets import *
 
 

@@ -210,8 +210,9 @@ def return_values(date):
     temp = prev_load = x_forecast['temperature'].iloc[0]
     p = peak_confidence(temp, sat, sun, holiday, prev_load)
     p = round(p, 3)
-    p = p*100
-    answer = 'There is a' + p + 'percent chance tomorrow will be a peak load day.'
+    p = p * 100
+    answer = 'There is a {} percent chance tomorrow will be a peak load day.'
+    answer = answer.format(p)
     return answer 
 
 if __name__ == '__main__':
