@@ -210,14 +210,9 @@ def return_values(date):
     temp = prev_load = x_forecast['temperature'].iloc[0]
     p = peak_confidence(temp, sat, sun, holiday, prev_load)
     p = round(p, 3)
-    answer = ''
-    if p >=0 or p <= .05:
-        answer = 'there is pretty much zero chance tomorrow will be a peak load day.'
-    elif p > .05:
-        answer = 'there is' + p + 'percent chance tomorrow will be a peak load day.'
+    p = p*100
+    answer = 'There is a' + p + 'percent chance tomorrow will be a peak load day.'
     return answer 
-
-
 
 if __name__ == '__main__':
     print('log functions imported')

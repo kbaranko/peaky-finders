@@ -5,13 +5,15 @@ import pandas as pd
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 import dash_gif_component as Gif
-from peaky_packages.functions import load_functions, forecast_functions
+from peaky_packages.functions import load_functions, forecast_functions, log_functions
+from log_functions import return_values
 from assets import *
 
 
 
 df = forecast_functions.final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H')) 
 df_load = load_functions.previous_7days_load()
+answer = return_values(pd.datetime.today().strftime('%Y-%m-%d %H'))
 
 plot_forecast = go.Scatter(x=list(df.index),
                             y=list(df['Predicted Load']),
@@ -67,6 +69,9 @@ app.layout = html.Div([
                     figure=fig),
         ], className='six columns'),
     ], className='row'),
+    html.Div([
+        html.H6(id='confidence_interval', children=answer)
+    ]),
     ])
 
 
