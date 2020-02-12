@@ -11,21 +11,21 @@ from assets import *
 
 
 
-df = forecast_functions.final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H')) 
+df = forecast_functions.final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H'))
 df_load = load_functions.previous_7days_load()
 answer = return_values(pd.datetime.today().strftime('%Y-%m-%d %H'))
 
 plot_forecast = go.Scatter(x=list(df.index),
-                            y=list(df['Predicted Load']),
-                            name="Projected",
-                            line=dict(color="#e76aeb", width=4, dash='dot')
-)
+                           y=list(df['Predicted Load']),
+                           name="Projected",
+                           line=dict(color="#e76aeb", width=4, dash='dot')
+                           )
 
 plot_historical = go.Scatter(x=list(df_load.index),
-                            y=list(df_load['load_MW']),
-                            name="Historical",
-                            line=dict(color="#43d9de")
-)
+                             y=list(df_load['load_MW']),
+                             name="Historical",
+                             line=dict(color="#43d9de")
+                             )
 
 data = [plot_forecast]
 data_1 = [plot_historical]
@@ -48,30 +48,32 @@ app.layout = html.Div([
         ], className="six columns"),
         ], className='row'),
     html.Div([
-            html.H5(id='drop-down-title', children='Select your ISO'),
-            html.Div(
-                dcc.Dropdown(
-                    options=[
-                        {'label': 'NYISO', 'value': 'NYISO'},
-                        {'label': 'PJM', 'value': 'PJM'},
-                        {'label': 'CAISO', 'value': 'CAISO'},
-                        ],
-                        id='select-iso'),
-            ),
+        html.H5(id='drop-down-title', children='Select your ISO'),
+        html.Div(
+            dcc.Dropdown(
+                options=[
+                    {'label': 'NYISO', 'value': 'NYISO'},
+                    {'label': 'PJM', 'value': 'PJM'},
+                    {'label': 'CAISO', 'value': 'CAISO'},
+                    ],
+                id='select-iso'),
+        ),
         ]),
     html.Div([
-            html.Div([
-                dcc.Graph(id='Historical Load Curve',
-                    figure=fig_1),
-        ], className='six columns'), 
+        html.Div([
+            dcc.Graph(id='Historical Load Curve',
+                      figure=fig_1),
+        ],
+                 className='six columns'),
         html.Div([
             dcc.Graph(id='Projected Load Curve',
-                    figure=fig),
+                      figure=fig),
         ], className='six columns'),
     ], className='row'),
     html.Div([
+        html.H5(id='confidence_interval_header', children='Tomorrow\'s Peak Day Forecast:'),
         html.H6(id='confidence_interval', children=answer)
-    ]),
+        ]),
     ])
 
 
