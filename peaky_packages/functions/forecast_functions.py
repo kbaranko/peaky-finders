@@ -103,6 +103,7 @@ def load_forecast_48hr(datetime):
         t = dic['time']
         t = str(t)
         t = (pd.to_datetime(t, unit='s'))
+        t = t - timedelta(hours=5)
         d = str(t)
         d = d[:-6]
         weekday = findDay(d)
@@ -116,7 +117,8 @@ def load_forecast_48hr(datetime):
         forecasts.append(tuple([t, temp, humidity, cloudcover, uvindex, weekday, hour, holiday]))
     forecasts = pd.DataFrame(forecasts)
     forecasts.columns = ['timestamp', 'temperature', 'humidity', 'cloudcover', 'uvindex', 'weekday', 'hour', 'holiday']
-    #pyiso load data
+    #have weather forecasts for the next 48hrs 
+    #now get pyiso load data
     begin = (dt.datetime.today() - timedelta(2)).strftime('%Y-%m-%d %H')
     end = pd.datetime.today().strftime('%Y-%m-%d %H')
     df = nyiso.get_load(latest=False, yesterday=False, start_at=begin, end_at=end)
@@ -321,7 +323,7 @@ def standardize_data(df, master_df):
     df_combo['first seasonal difference'] = (df_combo['first seasonal difference'] - np.mean(df_combo['first seasonal difference'])) / np.sqrt(np.var(df_combo['first seasonal difference']))
     df_combo['prev-day-hour-Std'] = (df_combo['prev-day-hour-Std'] - np.mean(df_combo['prev-day-hour-Std'])) / np.sqrt(np.var(df_combo['prev-day-hour-Std']))
     df_combo['prev-day-hour-MA'] = (df_combo['prev-day-hour-MA'] - np.mean(df_combo['prev-day-hour-MA'])) / np.sqrt(np.var(df_combo['prev-day-hour-MA']))
-    df = df_combo[-19:] 
+    df = df_combo[-24:] 
     return df
 
 #outputs dataframe with predictions for the next day hourly NYISO load
