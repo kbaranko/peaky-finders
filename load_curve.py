@@ -17,20 +17,20 @@ DF = final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H'))
 DF_LOAD = previous_7days_load()
 ANSWER = return_values(pd.datetime.today().strftime('%Y-%m-%d %H'))
 
-plot_forecast = go.Scatter(x=list(DF.index),
+PLOT_FORECAST = go.Scatter(x=list(DF.index),
                            y=list(DF['Predicted Load']),
                            name="Projected",
                            line=dict(color="#e76aeb", width=4, dash='dot')
                            )
 
-plot_historical = go.Scatter(x=list(DF_LOAD.index),
+PLOT_HISTORICAL = go.Scatter(x=list(DF_LOAD.index),
                              y=list(DF_LOAD['load_MW']),
                              name="Historical",
                              line=dict(color="#43d9de")
                              )
 
-DATA = [plot_forecast]
-DATA_1 = [plot_historical]
+DATA = [PLOT_FORECAST]
+DATA_1 = [PLOT_HISTORICAL]
 
 layout = dict(title="Projected Load Curve", showlegend=True)
 layout_1 = dict(title="7-Day Historical Load Curve", showlegend=True)
@@ -81,4 +81,5 @@ app.layout = html.Div([
 
 #if the file name assignmed is main, then we'll actually run our server
 if __name__ == '__main__':
-    app.run_server(debug=True)   
+    app.run_server(debug=True)
+ 
