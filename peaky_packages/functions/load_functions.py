@@ -17,10 +17,7 @@ def format_datetime(row):
     datetime_string = str(datetime_string)
     datetime_string = datetime_string[:19]
     row['timestamp'] = datetime_string
-    return row 
-
-
-    
+    return row
 
 #gets load info for nyiso  
 def previous_7days_load():
@@ -37,9 +34,7 @@ def previous_7days_load():
     df = df.apply(format_datetime, axis=1)
     df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y-%m-%d %H:%M')
     df = df.set_index('timestamp')
-    return df 
-
-
+    return df
 
 if __name__ == '__main__':
     print('load functions imported')
