@@ -1,4 +1,4 @@
-#Import dash, pandas, plotly, static images, and load forecasting functions 
+#Import dash, pandas, plotly, static images, and load forecasting functions
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -6,36 +6,37 @@ import pandas as pd
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 import dash_gif_component as Gif
-from peaky_packages.functions import load_functions, forecast_functions
-from peaky_packages.functions.log_functions import *
+from peaky_packages.functions.load_functions import previous_7days_load
+from peaky_packages.functions.forecast_functions import final_forecast
+from peaky_packages.functions.log_functions import return_values
 from assets import *
 
 
 
-df = forecast_functions.final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H'))
-df_load = load_functions.previous_7days_load()
-answer = return_values(pd.datetime.today().strftime('%Y-%m-%d %H'))
+DF = final_forecast(pd.datetime.today().strftime('%Y-%m-%d %H'))
+DF_LOAD = previous_7days_load()
+ANSWER = return_values(pd.datetime.today().strftime('%Y-%m-%d %H'))
 
-plot_forecast = go.Scatter(x=list(df.index),
-                           y=list(df['Predicted Load']),
+plot_forecast = go.Scatter(x=list(DF.index),
+                           y=list(DF['Predicted Load']),
                            name="Projected",
                            line=dict(color="#e76aeb", width=4, dash='dot')
                            )
 
-plot_historical = go.Scatter(x=list(df_load.index),
-                             y=list(df_load['load_MW']),
+plot_historical = go.Scatter(x=list(DF_LOAD.index),
+                             y=list(DF_LOAD['load_MW']),
                              name="Historical",
                              line=dict(color="#43d9de")
                              )
 
-data = [plot_forecast]
-data_1 = [plot_historical]
+DATA = [plot_forecast]
+DATA_1 = [plot_historical]
 
 layout = dict(title="Projected Load Curve", showlegend=True)
 layout_1 = dict(title="7-Day Historical Load Curve", showlegend=True)
 
-fig = dict(data=data, layout=layout)
-fig_1 = dict(data=data_1, layout=layout_1)
+fig = dict(data=DATA, layout=layout)
+fig_1 = dict(data=DATA_1, layout=layout_1)
 
 app = dash.Dash(__name__)
 
@@ -73,11 +74,11 @@ app.layout = html.Div([
     ], className='row'),
     html.Div([
         html.H5(id='confidence_interval_header', children='Tomorrow\'s Peak Day Forecast:'),
-        html.H6(id='confidence_interval', children=answer)
+        html.H6(id='confidence_interval', children=ANSWER)
         ]),
     ])
 
 
 #if the file name assignmed is main, then we'll actually run our server
 if __name__ == '__main__':
-    app.run_server(debug=True)    
+    app.run_server(debug=True)   
