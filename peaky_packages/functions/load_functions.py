@@ -1,10 +1,8 @@
+#import necessary packages 
 from pyiso import client_factory
 import pandas as pd
 import config
-import requests
-import config
 import json
-import pandas as pd
 import numpy as np
 import datetime as dt
 import calendar
