@@ -10,12 +10,12 @@ import datetime as dt
 import calendar
 import holidays
 from datetime import date, timedelta
-import pickle 
-import math 
+import pickle
+import math
 
 
-#script will only work if 1. config.py file is in main program directory that is importing this module and 2. pkl file is in main program directory to run model
-
+#script will only work if 1.config.py file is in main program directory that is importing 
+#this module and 2. pkl file is in main program directory to run model
 us_holidays = holidays.UnitedStates()
 def is_holiday(day):
     if day in us_holidays:
@@ -23,10 +23,10 @@ def is_holiday(day):
     else:
         return False
 
-#returns day of the week for a given date 
-def findDay(date): 
-    day = dt.datetime.strptime(date, '%Y-%m-%d %H').weekday() 
-    return (calendar.day_name[day])
+#returns day of the week for a given date
+def findDay(date):
+    day = dt.datetime.strptime(date, '%Y-%m-%d %H').weekday()
+    return calendar.day_name[day]
 
 #formats datetime string to prepare for joins
 def format_datetime(row):
@@ -34,7 +34,7 @@ def format_datetime(row):
     datetime_string = str(datetime_string)
     datetime_string = datetime_string[:19]
     row['timestamp'] = datetime_string
-    return row 
+    return row
 
 def prepare_predictions_log(array, df_x):
     df_pred = pd.DataFrame(array)
@@ -48,9 +48,7 @@ def prepare_predictions_log(array, df_x):
 
 def prep_V6(df):
     df['load (t-1)'] = df.load_MW.shift(1)
-    df['first difference'] = df.load_MW.shift(1) - df.load_MW.shift(2) 
-    #df['temp (t-24)'] = df.temperature.shift(24) 
-    #df = df.dropna(axis = 0, how ='any')
+    df['first difference'] = df.load_MW.shift(1) - df.load_MW.shift(2)
     return df 
 
 def format_datetime_peak_day(row):
@@ -58,7 +56,7 @@ def format_datetime_peak_day(row):
     datetime_string = str(datetime_string)
     datetime_string = datetime_string[:11]
     row['timestamp'] = datetime_string
-    return row 
+    return row
 
 
 def load_forecast_48hr_log(datetime):
@@ -67,7 +65,7 @@ def load_forecast_48hr_log(datetime):
     nyc_lat = "40.7128"
     nyc_long = "-73.935242"
     url_base = "https://api.darksky.net/forecast"
-    exclude = 'flags, minutely, daily, alerts'    
+    exclude = 'flags, minutely, daily, alerts'
     full_url = "{}/{}/{},{}?exclude={}".format(url_base, api_key, 
                                                      nyc_lat, nyc_long, 
                                                   exclude)
@@ -77,7 +75,7 @@ def load_forecast_48hr_log(datetime):
     hourly = hourly['data']
     forecasts = []
     for i in list(range(len(hourly))):
-        dic = hourly[i] 
+        dic = hourly[i]
         t = dic['time']
         t = str(t)
         t = (pd.to_datetime(t, unit='s'))
