@@ -14,7 +14,7 @@ import pickle
 import math
 
 
-#script will only work if 1.config.py file is in main program directory that is importing 
+#script will only work if 1.config.py file is in main program directory that is importing
 #this module and 2. pkl file is in main program directory to run model
 us_holidays = holidays.UnitedStates()
 def is_holiday(day):
@@ -49,7 +49,7 @@ def prepare_predictions_log(array, df_x):
 def prep_V6(df):
     df['load (t-1)'] = df.load_MW.shift(1)
     df['first difference'] = df.load_MW.shift(1) - df.load_MW.shift(2)
-    return df 
+    return df
 
 def format_datetime_peak_day(row):
     datetime_string = row['timestamp']
@@ -66,9 +66,9 @@ def load_forecast_48hr_log(datetime):
     nyc_long = "-73.935242"
     url_base = "https://api.darksky.net/forecast"
     exclude = 'flags, minutely, daily, alerts'
-    full_url = "{}/{}/{},{}?exclude={}".format(url_base, api_key, 
-                                                     nyc_lat, nyc_long, 
-                                                  exclude)
+    full_url = "{}/{}/{},{}?exclude={}".format(url_base, api_key,
+                                               nyc_lat, nyc_long, 
+                                               exclude)
     response = requests.get(full_url)
     info = response.json()
     hourly = info['hourly']
@@ -99,16 +99,16 @@ def load_forecast_48hr_log(datetime):
     df = df.apply(format_datetime, axis=1)
     df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y-%m-%d %H:%M')
     df = df.set_index('timestamp')
-    future = pd.date_range(pd.datetime.today().strftime('%Y-%m-%d %H'), periods = 24, freq ='H')
+    future = pd.date_range(pd.datetime.today().strftime('%Y-%m-%d %H'), periods=24, freq='H')
     future = pd.DataFrame(future)
     future.columns = ['timestamp']
     future = future.set_index('timestamp')
     combine = [df, future]
     total = pd.concat(combine)
     result = pd.merge(total,
-                     forecasts,
-                     on='timestamp', 
-                     how='left')
+                      forecasts,
+                      on='timestamp',
+                      how='left')
     result = result.set_index('timestamp')
     day_dummies = pd.get_dummies(result['weekday'], prefix='day', drop_first=False)
     holiday_dummies = pd.get_dummies(result['holiday'], prefix='holiday', drop_first=True)
@@ -117,13 +117,13 @@ def load_forecast_48hr_log(datetime):
     result = result.resample('D').max()
     result = prep_V6(result)
     result = result.drop('load_MW', 1)
-    result = result.dropna(axis = 0, how ='any')
-    return result 
+    result = result.dropna(axis=0, how='any')
+    return result
 
 def add_categorical_dummies_log(df):
-    df['day_Saturday']=0 
-    df['day_Sunday']=0  
-    df['holiday_1.0']=0
+    df['day_Saturday'] = 0
+    df['day_Sunday'] = 0
+    df['holiday_1.0'] = 0
     if 'day_Saturday' not in df.columns:
         df['day_Saturday'] = 0
     elif 'day_Saturday' not in df.columns:
@@ -132,9 +132,7 @@ def add_categorical_dummies_log(df):
         df['day_Sunday'] = 0
     elif 'day_Sunday' not in df.columns:
         df['day_Sunday'] = 0
-
     return df
-
 
 def standardize_log_data(df, master_df):
     df = df[['temperature', 'day_Saturday', 'day_Sunday', 'holiday_1.0', 'load (t-1)']]
@@ -160,7 +158,6 @@ def log_forecast(date):
     df_pred = pd.DataFrame(predictions)
     forecast = prepare_predictions_log(predictions, x_forecast)
     return forecast
-
 
 def log_forecast_to_dict(date):
     log_model_loaded = pickle.load(open('log_reg_model.pkl', "rb"))
