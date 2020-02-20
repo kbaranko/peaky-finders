@@ -133,7 +133,7 @@ def add_categorical_dummies_log(df):
     elif 'day_Sunday' not in df.columns:
         df['day_Sunday'] = 0
 
-    return df 
+    return df
 
 
 def standardize_log_data(df, master_df):
@@ -146,7 +146,7 @@ def standardize_log_data(df, master_df):
     df_combo = pd.concat(df_combo)
     df_combo['temperature'] = (df_combo['temperature'] - np.mean(df_combo['temperature'])) / np.sqrt(np.var(df_combo['temperature']))
     df_combo['load (t-1)'] = (df_combo['load (t-1)'] - np.mean(df_combo['load (t-1)'])) / np.sqrt(np.var(df_combo['load (t-1)']))
-    df = df_combo[-1:] 
+    df = df_combo[-1:]
     df = df.drop('index', 1)
     return df
 
@@ -159,7 +159,7 @@ def log_forecast(date):
     predictions = log_model_loaded.predict(x_forecast)
     df_pred = pd.DataFrame(predictions)
     forecast = prepare_predictions_log(predictions, x_forecast)
-    return forecast 
+    return forecast
 
 
 def log_forecast_to_dict(date):
@@ -174,10 +174,11 @@ def log_forecast_to_dict(date):
     forecast = forecast.reset_index()
     forecast = forecast.apply(format_datetime_peak_day, 1)
     forecast = forecast.set_index('timestamp')
-    forecast['Peak Day'] = np.where(forecast['Peak Day']>=1, 'There is a good chance', 'Probably Not')
+    forecast['Peak Day'] = np.where(forecast['Peak Day'] >= 1, 
+                           'There is a good chance', 'Probably Not')
     forecast = forecast.to_dict()
     forecast = forecast['Peak Day']
-    return forecast 
+    return forecast
 
 def prepare_predictions_log(array, df_x):
     df_pred = pd.DataFrame(array)
@@ -211,7 +212,7 @@ def return_values(date):
     p = p * 100
     answer = 'There is a {} percent chance tomorrow will be a peak load day.'
     answer = answer.format(p)
-    return answer 
+    return answer
 
 if __name__ == '__main__':
     print('log functions imported')
