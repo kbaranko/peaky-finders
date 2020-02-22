@@ -6,7 +6,7 @@ import numpy as np
 import datetime as dt
 import calendar
 import holidays
-from datetime import date, timedelta
+from datetime import timedelta
 import pickle
 import math
 from pyiso import client_factory
@@ -186,9 +186,9 @@ def prepare_predictions_log(array, df_x):
     return df_lets_see
 
 def peak_confidence(temp, sat, sun, holiday, prev_load):
-    e = math.e 
+    e = math.e
     p = 1/(1 + e**(-1*(2.883978*temp + -1.326981*sat + -1.291990*sun + -0.740864*holiday + 0.759935*prev_load)))
-    return p  
+    return p
 
 
 def return_values(date):
