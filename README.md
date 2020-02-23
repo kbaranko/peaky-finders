@@ -65,7 +65,7 @@ The model uses a .25 threshold value, rather than the standard .5 in order to el
 
 ## Front End App
 
-The front end consists of a Dash application running both models. The top of the homepage renders the confidence interval from the logistic regression model. It is programmed to provide the response shown below when the probability of a peak load day is under .05%. Otherwise, it will return the percent chance. 
+The front end consists of a Dash application running both models. The top of the homepage renders the last week of historical load data and the projected load curve. Below the two visuals, the app outputs the confidence interval of the logistic regression model. 
 
 ![Interactive Dashboard](images/updated_image.png)
 
