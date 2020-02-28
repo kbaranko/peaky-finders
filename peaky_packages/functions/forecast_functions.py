@@ -1,6 +1,3 @@
-from pyiso import client_factory
-import pandas as pd
-import config
 import requests
 import config
 import json
@@ -11,8 +8,11 @@ import calendar
 import holidays
 from datetime import date, timedelta
 import pickle 
+import config
+from pyiso import client_factory
 
-#script will only work if 1. config.py file is in main program directory that is importing this module and 2. pkl file is in main program directory to run model
+#script will only work if 1. config.py file is in main program directory that is
+#importing this module and 2. pkl file is in main program directory to run model
 
 #gets current weather information from darksky api 
 def get_current_weather(datetime):
@@ -20,10 +20,10 @@ def get_current_weather(datetime):
     nyc_lat = "40.7128"
     nyc_long = "-73.935242"
     url_base = "https://api.darksky.net/forecast"
-    exclude = 'flags, minutely, daily, alerts'    
-    full_url = "{}/{}/{},{}?exclude={}".format(url_base, api_key, 
-                                                     nyc_lat, nyc_long, 
-                                                  exclude)
+    exclude = 'flags, minutely, daily, alerts'
+    full_url = "{}/{}/{},{}?exclude={}".format(url_base, api_key,
+                                               nyc_lat, nyc_long,
+                                               exclude)
     response = requests.get(full_url)
     info = response.json()
     currently = info['currently']
@@ -31,12 +31,12 @@ def get_current_weather(datetime):
     t = str(t)
     t = (pd.to_datetime(t, unit='s'))
     temp = currently['temperature']
-    humidity =  currently['humidity'] 
+    humidity =  currently['humidity']
     cloudcover = currently['cloudCover']
     uvindex = currently['uvIndex']
     return temp, humidity, cloudcover, uvindex
 
-#determines if a given day is a US holiday 
+#determines if a given day is a US holiday
 us_holidays = holidays.UnitedStates()
 def is_holiday(day):
     if day in us_holidays:
@@ -44,9 +44,9 @@ def is_holiday(day):
     else:
         return False
 
-#returns day of the week for a given date 
-def findDay(date): 
-    day = dt.datetime.strptime(date, '%Y-%m-%d %H').weekday() 
+#returns day of the week for a given date
+def findDay(date):
+    day = dt.datetime.strptime(date, '%Y-%m-%d %H').weekday()
     return (calendar.day_name[day])
 
 #formats datetime string to prepare for joins
@@ -55,19 +55,19 @@ def format_datetime(row):
     datetime_string = str(datetime_string)
     datetime_string = datetime_string[:19]
     row['timestamp'] = datetime_string
-    return row 
+    return row
 
-#creates ARMA type features  
+#creates ARMA type features
 def prep_V5(df):
-    df['load (t-24)'] = df.load_MW.shift(24) 
-    df['first seasonal difference'] = df.load_MW.shift(24) - df.load_MW.shift(25) 
+    df['load (t-24)'] = df.load_MW.shift(24)
+    df['first seasonal difference'] = df.load_MW.shift(24) - df.load_MW.shift(25)
     df['prev-day-hour-Std'] = df.load_MW.shift(24).rolling(window=24).std()
     df['prev-day-hour-MA'] = df.load_MW.shift(24).rolling(window=24).mean()
-    return df 
+    return df
 
 #helper function for format hour 
 def split(word): 
-    return [char for char in word] 
+    return [char for char in word]
 
 #formats hour for xg boost model
 def format_hour(hour):
@@ -75,13 +75,13 @@ def format_hour(hour):
     if hour[0] == '0':
         hour = hour[1:]
     elif hour[0] != '0':
-        hour = hour 
+        hour = hour
     z = ''
     hour = z.join(hour)
     hour = hour + '.0'
     return hour
 
-#returns dataframe ready for xg boost model 
+#returns dataframe ready for xg boost model
 def load_forecast_48hr(datetime):
     nyiso = client_factory('NYISO', timeout_seconds=60)
     #weather data
@@ -89,17 +89,17 @@ def load_forecast_48hr(datetime):
     nyc_lat = "40.7128"
     nyc_long = "-73.935242"
     url_base = "https://api.darksky.net/forecast"
-    exclude = 'flags, minutely, daily, alerts'    
+    exclude = 'flags, minutely, daily, alerts'
     full_url = "{}/{}/{},{}?exclude={}".format(url_base, api_key, 
-                                                     nyc_lat, nyc_long, 
-                                                  exclude)
+                                               nyc_lat, nyc_long, 
+                                            exclude)
     response = requests.get(full_url)
     info = response.json()
     hourly = info['hourly']
     hourly = hourly['data']
     forecasts = []
     for i in list(range(len(hourly))):
-        dic = hourly[i] 
+        dic = hourly[i]
         t = dic['time']
         t = str(t)
         t = (pd.to_datetime(t, unit='s'))
@@ -111,13 +111,13 @@ def load_forecast_48hr(datetime):
         hour = d[11:13]
         hour = format_hour(hour)
         temp = dic['temperature']
-        humidity =  dic['humidity'] 
+        humidity =  dic['humidity']
         cloudcover = dic['cloudCover']
         uvindex = dic['uvIndex']
         forecasts.append(tuple([t, temp, humidity, cloudcover, uvindex, weekday, hour, holiday]))
     forecasts = pd.DataFrame(forecasts)
     forecasts.columns = ['timestamp', 'temperature', 'humidity', 'cloudcover', 'uvindex', 'weekday', 'hour', 'holiday']
-    #have weather forecasts for the next 48hrs 
+    #have weather forecasts for the next 48hrs
     #now get pyiso load data
     begin = (dt.datetime.today() - timedelta(2)).strftime('%Y-%m-%d %H')
     end = pd.datetime.today().strftime('%Y-%m-%d %H')
@@ -143,7 +143,7 @@ def load_forecast_48hr(datetime):
     total = total.reset_index()
     result = pd.merge(total,
                  forecasts,
-                 on='timestamp', 
+                 on='timestamp',
                  how='left')
     result = result.dropna(axis = 0, how ='any')
     result = result.set_index('timestamp')
@@ -154,34 +154,34 @@ def load_forecast_48hr(datetime):
     result = pd.concat([result, day_dummies, hour_dummies, holiday_dummies], axis=1)
     return result
 
-#adds categorical dummy variables 
+#adds categorical dummy variables
 def add_categorical_dummies(df):
-    df['day_Monday'] =0 
-    df['day_Tuesday']=0 
-    df['day_Wednesday']=0 
-    df['day_Thursday']=0 
-    df['day_Saturday']=0 
-    df['day_Sunday']=0 
-    df['hour_1.0'] =0 
-    df['hour_2.0']=0 
-    df['hour_3.0']=0 
-    df['hour_4.0']=0 
-    df['hour_5.0']=0 
+    df['day_Monday'] =0
+    df['day_Tuesday']=0
+    df['day_Wednesday']=0
+    df['day_Thursday']=0
+    df['day_Saturday']=0
+    df['day_Sunday']=0
+    df['hour_1.0'] =0
+    df['hour_2.0']=0
+    df['hour_3.0']=0
+    df['hour_4.0']=0
+    df['hour_5.0']=0
     df['hour_6.0']=0
-    df['hour_7.0'] =0 
-    df['hour_8.0']=0 
-    df['hour_9.0']=0 
-    df['hour_10.0']=0 
-    df['hour_11.0']=0 
+    df['hour_7.0']=0
+    df['hour_8.0']=0
+    df['hour_9.0']=0
+    df['hour_10.0']=0
+    df['hour_11.0']=0
     df['hour_12.0']=0
-    df['hour_13.0'] =0 
-    df['hour_14.0']=0 
-    df['hour_15.0']=0 
-    df['hour_16.0']=0 
-    df['hour_17.0']=0 
+    df['hour_13.0']=0
+    df['hour_14.0']=0
+    df['hour_15.0']=0
+    df['hour_16.0']=0
+    df['hour_17.0']=0
     df['hour_18.0']=0
-    df['hour_19.0']=0 
-    df['hour_21.0']=0 
+    df['hour_19.0']=0
+    df['hour_21.0']=0
     df['hour_22.0']=0
     df['hour_23.0']=0
     df['holiday_1.0']=0
