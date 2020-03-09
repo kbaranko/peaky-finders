@@ -7,14 +7,14 @@ import datetime as dt
 import calendar
 import holidays
 from datetime import date, timedelta
-import pickle 
+import pickle
 import config
 from pyiso import client_factory
 
 #script will only work if 1. config.py file is in main program directory that is
 #importing this module and 2. pkl file is in main program directory to run model
 
-#gets current weather information from darksky api 
+#gets current weather information from darksky api
 def get_current_weather(datetime):
     api_key = config.api_key
     nyc_lat = "40.7128"
@@ -31,7 +31,7 @@ def get_current_weather(datetime):
     t = str(t)
     t = (pd.to_datetime(t, unit='s'))
     temp = currently['temperature']
-    humidity =  currently['humidity']
+    humidity = currently['humidity']
     cloudcover = currently['cloudCover']
     uvindex = currently['uvIndex']
     return temp, humidity, cloudcover, uvindex
@@ -47,7 +47,7 @@ def is_holiday(day):
 #returns day of the week for a given date
 def findDay(date):
     day = dt.datetime.strptime(date, '%Y-%m-%d %H').weekday()
-    return (calendar.day_name[day])
+    return calendar.day_name[day]
 
 #formats datetime string to prepare for joins
 def format_datetime(row):
@@ -65,8 +65,8 @@ def prep_V5(df):
     df['prev-day-hour-MA'] = df.load_MW.shift(24).rolling(window=24).mean()
     return df
 
-#helper function for format hour 
-def split(word): 
+#helper function for format hour
+def split(word):
     return [char for char in word]
 
 #formats hour for xg boost model
@@ -90,8 +90,8 @@ def load_forecast_48hr(datetime):
     nyc_long = "-73.935242"
     url_base = "https://api.darksky.net/forecast"
     exclude = 'flags, minutely, daily, alerts'
-    full_url = "{}/{}/{},{}?exclude={}".format(url_base, api_key, 
-                                               nyc_lat, nyc_long, 
+    full_url = "{}/{}/{},{}?exclude={}".format(url_base, api_key,
+                                               nyc_lat, nyc_long,
                                             exclude)
     response = requests.get(full_url)
     info = response.json()
@@ -131,7 +131,7 @@ def load_forecast_48hr(datetime):
     df = df.apply(format_datetime, axis=1)
     df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y-%m-%d %H:%M')
     df = df.set_index('timestamp')
-    future = pd.date_range(pd.datetime.today().strftime('%Y-%m-%d %H'), periods = 24, freq ='H')
+    future = pd.date_range(pd.datetime.today().strftime('%Y-%m-%d %H'), periods=24, freq='H')
     future = pd.DataFrame(future)
     future.columns = ['timestamp']
     future = future.set_index('timestamp')
@@ -156,7 +156,7 @@ def load_forecast_48hr(datetime):
 
 #adds categorical dummy variables
 def add_categorical_dummies(df):
-    df['day_Monday'] =0
+    df['day_Monday']=0
     df['day_Tuesday']=0
     df['day_Wednesday']=0
     df['day_Thursday']=0
@@ -186,57 +186,57 @@ def add_categorical_dummies(df):
     df['hour_23.0']=0
     df['holiday_1.0']=0
     if 'day_Monday' in df.columns:
-        df['day_Monday'] = 1
+        df['day_Monday']=1
     elif 'day_Monday' not in df.columns:
-        df['day_Monday'] = 0
+        df['day_Monday']=0
     if 'day_Tuesday' in df.columns:
-        df['day_Tuesday'] = 1
+        df['day_Tuesday']=1
     elif 'day_Tuesday' not in df.columns:
-        df['day_Tuesday'] = 0
+        df['day_Tuesday']=0
     if 'day_Wednesday' in df.columns:
-        df['day_Wednesday'] = 1
+        df['day_Wednesday']=1
     elif 'day_Wednesday' not in df.columns:
-        df['day_Wednesday'] = 0
+        df['day_Wednesday']=0
     if 'day_Thursday' in df.columns:
-        df['day_Thursday'] = 1
+        df['day_Thursday']=1
     elif 'day_Thursday' not in df.columns:
-        df['day_Thursday'] = 0
+        df['day_Thursday']=0
     if 'day_Saturday' not in df.columns:
-        df['day_Saturday'] = 0
+        df['day_Saturday']=0
     elif 'day_Saturday' not in df.columns:
-        df['day_Saturday'] = 0
+        df['day_Saturday']=0
     if 'day_Sunday' not in df.columns:
-        df['day_Sunday'] = 0
+        df['day_Sunday']=0
     elif 'day_Sunday' not in df.columns:
-        df['day_Sunday'] = 0
+        df['day_Sunday']=0
     if 'hour_1.0' in df.columns:
-        df['hour_1.0'] = 1
+        df['hour_1.0']=1
     elif 'hour_1.0' not in df.columns:
-        df['hour_1.0'] = 0
+        df['hour_1.0']=0
     if 'hour_2.0' in df.columns:
-        df['hour_2.0'] = 1
+        df['hour_2.0']=1
     elif 'hour_2.0' not in df.columns:
-        df['hour_2.0'] = 0
+        df['hour_2.0']=0
     if 'hour_3.0' in df.columns:
-        df['hour_3.0'] = 1
+        df['hour_3.0']=1
     elif 'hour_3.0' not in df.columns:
-        df['hour_3.0'] = 0
+        df['hour_3.0']=0
     if 'hour_4.0' in df.columns:
-        df['hour_4.0'] = 1
+        df['hour_4.0']=1
     elif 'hour_4.0' not in df.columns:
-        df['hour_4.0'] = 0
+        df['hour_4.0']=0
     if 'hour_5.0' not in df.columns:
-        df['hour_5.0'] = 0
+        df['hour_5.0']=0
     elif 'hour_5.0' not in df.columns:
-        df['hour_5.0'] = 0
+        df['hour_5.0']=0
     if 'hour_6.0' not in df.columns:
-        df['hour_6.0'] = 0
+        df['hour_6.0']=0
     elif 'hour_6.0' not in df.columns:
-        df['hour_6.0'] = 0
+        df['hour_6.0']=0
     if 'hour_7.0' in df.columns:
-        df['hour_7.0'] = 1
+        df['hour_7.0']=1
     elif 'hour_7.0' not in df.columns:
-        df['hour_7.0'] = 0
+        df['hour_7.0']=0
     if 'hour_8.0' in df.columns:
         df['hour_8.0'] = 1
     elif 'hour_8.0' not in df.columns:
