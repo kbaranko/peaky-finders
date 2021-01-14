@@ -35,8 +35,9 @@ class Pipeline:
         """Feature engineering + model preparation """
         self.iso.engineer_features()
         self.iso.build_model_input()
+        import pdb; pdb.set_trace()
         if self.save_model_input:
-            self.iso.model_input.to_csv(f'training_data/{self.iso_name}_{self.start}_{self.end}.csv')
+            self.iso.model_input.to_csv(f'/peaky_finders/training_data/{self.iso_name}_{self.start}_{self.end}.csv')
 
     def phase_three(self):
         """Model training & serialization"""
@@ -50,8 +51,8 @@ class Pipeline:
         print('Mean Absolute Error:', mean_absolute_error(y_test, val_preds))  
         print('Root Mean Squared Error:', np.sqrt(mean_squared_error(y_test, val_preds)))
         if self.save_model_output:
-            model_name = f'xg_boost_{self.iso.name}_load_model.pkl'
-            pickle.dump(reg, open(file_name, "wb"))
+            model_name = f'/peaky_finders/models/xg_boost_{self.iso_name}_load_model.pkl'
+            pickle.dump(reg, open(model_name, "wb"))
 
     def execute(self):
         self.phase_one()
