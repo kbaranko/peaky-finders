@@ -25,6 +25,7 @@ class Pipeline:
         self.iso = None
 
         self.save_model_input = save_model_input
+        self.save_model_output = save_model_output
 
     def phase_one(self):
         """Data acquisition"""
@@ -48,7 +49,7 @@ class Pipeline:
         val_preds = reg.predict(X_test)
         print('Mean Absolute Error:', mean_absolute_error(y_test, val_preds))  
         print('Root Mean Squared Error:', np.sqrt(mean_squared_error(y_test, val_preds)))
-        if self.save_model:
+        if self.save_model_output:
             model_name = f'xg_boost_{self.iso.name}_load_model.pkl'
             pickle.dump(reg, open(file_name, "wb"))
 
