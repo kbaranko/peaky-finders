@@ -1,3 +1,4 @@
+import argparse
 import pickle
 
 import numpy as np
@@ -11,17 +12,18 @@ from peaky_finders.data_acquisition.nyiso import NYISO
 
 class Pipeline:
 
-    def __init__(self, iso: str, model: str, start: str, end: str, save_model_input: bool = False):
+    def __init__(self, iso: str, model: str, start_date: str, end_date: str, save_model_input: bool, save_model_output: bool):
         """
         Args:
             iso: the iso to forecast ('nyiso', 'ercot', etc.)
             model: logistic regression 'log' or xgboost     
         """
-        self.start = start
-        self.end = end
         self.iso_name = iso
-        self.iso = None
         self.model = model
+        self.start = start_date
+        self.end = end_date
+        self.iso = None
+
         self.save_model_input = save_model_input
 
     def phase_one(self):
@@ -57,13 +59,53 @@ class Pipeline:
 
     @staticmethod
     def _set_iso(iso: str, start: str, end: str):
-        if iso == 'nyiso':
+        if iso == 'NYISO':
             return NYISO(start, end)
         else:
             print(f'Cannot train model for ISO {iso}')
 
 
+# python peaky_finders/training_pipeline.py --iso NYISO --model xgboost --start_date 05-01-2020 --end_date 05-28-2020 --save_model_input False --save_model_output False
+
 if __name__ == "__main__":
-    pipeline = Pipeline(iso='nyiso', model='load_forecast', start='05-01-2020', end='05-28-2020')
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-i', '--iso',
+        default='NYISO',
+        type=str,
+        help='Select ISO for model prediction.'
+    )
+    parser.add_argument(
+        '-m', '--model',
+        type=str,
+        help='Model to train (xgboost for forecast, log regression for peak.'
+    )
+    parser.add_argument(
+        '-s', '--start_date',
+        type=str,
+        help='Start date range for model training.')
+    parser.add_argument(
+        '-e', '--end_date',
+        type=str,
+        help='End date range for model training.')
+    parser.add_argument(
+        '-mi', '--save_model_input',
+        type=bool,
+        help='Save model input (w/ features and scaled.')
+    parser.add_argument(
+        '-mo', '--save_model_output',
+        type=bool,
+        help='Save trained model as pickle file.'
+    )
+
+    args = parser.parse_args()
+    pipeline = Pipeline(
+        iso=args.iso, 
+        model=args.model, 
+        start_date=args.start_date, 
+        end_date=args.end_date, 
+        save_model_input=args.save_model_input, 
+        save_model_output=args.save_model_output
+    )
     pipeline.execute()
 
