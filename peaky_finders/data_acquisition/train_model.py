@@ -14,12 +14,39 @@ import requests
 from sklearn import preprocessing
 
 
-LAT = '40.7128'
-LON = '-73.935242'
+GEO_COORDS = {
+    'NYISO':
+        {
+            'lat': '40.7128',
+            'lon': '-73.935242'
+        },
+    'ISONE':
+        {
+            'lat': '42.3601',
+            'lon': '-71.0589'
+        },
+    'CAISO':
+        {
+            'lat': '34.0522',
+            'lon': '-118.2437'
+        },
+    'ERCOT':
+        {
+            'lat': '29.7604',
+            'lon': '-95.3698'
+        },
+    'PJM':
+        {
+            'lat': '39.9526',
+            'lon': '-75.1652'
+        },
+}
+
+
 BASE_URL = 'https://api.darksky.net/forecast'
 EXCLUDE = 'flags, minutely, daily, alerts'
 API_KEY = os.environ['DARKSKY_KEY']
-FULL_DARKSKY_URL = f'{BASE_URL}/{API_KEY}/{LAT},{LON},'
+
 LOAD_COLS = ['load_MW', 'timestamp']
 EASTERN_TZ = 'US/Eastern'
 
@@ -28,19 +55,22 @@ CATEGORICAL_FEATURES = ['weekday', 'hour_of_day', 'holiday']
 NUMERICAL_FEATURES = ['temperature', 'load (t-24)']
 
 
-class NYISO:
+class LoadCollector:
 
-    def __init__(self, start_date: str, end_date: str):
+    def __init__(self, iso: str, start_date: str, end_date: str):
         self.start = start_date
         self.end = end_date
+        self.iso = self._set_iso(iso)
         self.holidays = holidays.UnitedStates()
         self.load = self.get_historical_load()
         self.model_input = None
+        self.lat = GEO_COORDS[iso]['lat']
+        self.lon = GEO_COORDS[iso]['lon']
+        self.weather_url = f'{BASE_URL}/{API_KEY}/{self.lat},{self.lon},'
 
     def get_historical_load(self) -> pd.DataFrame:
-        nyiso = client_factory('NYISO', timeout_seconds=60)
         load = pd.DataFrame(
-            nyiso.get_load(
+            self.iso.get_load(
                 latest=False,
                 yesterday=False,
                 start_at=self.start,
@@ -67,9 +97,24 @@ class NYISO:
         self.model_input = self.standardize_numerical_features(self.model_input)
 
     @staticmethod
-    def _get_temperature(date):
+    def _set_iso(iso_name: str):
+        if iso_name == 'NYISO':
+            iso_engine = client_factory('NYISO')
+        elif iso_name == 'ISONE':
+            iso_engine = client_factory('ISONE')
+        elif iso_name == 'CAISO':
+            iso_engine = client_factory('CAISO')
+        elif iso_name == 'ERCOT':
+            iso_engine = client_factory('ERCOT')
+        elif iso_name == 'PJM':
+            iso_engine = client_factory('PJM')
+        else:
+            print(f'Peaky Finders does not support {iso_name} yet!')
+        return iso_engine
+
+    def _get_temperature(self, date):
         date_input = date.strftime('%s')
-        full_url = f'{FULL_DARKSKY_URL}{date_input}?exclude={EXCLUDE}'
+        full_url = f'{self.weather_url}{date_input}?exclude={EXCLUDE}'
         response = requests.get(full_url)
         if response.status_code == 200:
             print(response.status_code)
