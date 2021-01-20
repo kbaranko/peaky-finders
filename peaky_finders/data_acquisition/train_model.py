@@ -5,6 +5,7 @@ import holidays
 import math
 import os
 
+from dateutil.relativedelta import relativedelta
 import json
 import numpy as np
 import pandas as pd
@@ -61,6 +62,7 @@ class LoadCollector:
     def __init__(self, iso: str, start_date: str, end_date: str):
         self.start = start_date
         self.end = end_date
+        self.iso_name = iso
         self.iso = self._set_iso(iso)
         self.holidays = holidays.UnitedStates()
         self.load = self.get_historical_load()
@@ -70,17 +72,55 @@ class LoadCollector:
         self.weather_url = f'{BASE_URL}/{API_KEY}/{self.lat},{self.lon},'
 
     def get_historical_load(self) -> pd.DataFrame:
-        load = pd.DataFrame(
-            self.iso.get_load(
-                latest=False,
-                yesterday=False,
-                start_at=self.start,
-                end_at=self.end)
+        if self.iso_name == 'CAISO':
+            load = self.get_caiso_load()
+        else:
+            load = pd.DataFrame(
+                self.iso.get_load(
+                    latest=False,
+                    yesterday=False,
+                    start_at=self.start,
+                    end_at=self.end)
             )[LOAD_COLS].set_index('timestamp')
         tz_finder = TimezoneFinder()
         tz_name = tz_finder.timezone_at(lng=self.lon, lat=self.lat)
         load.index = load.index.tz_convert(tz_name)
         return load.resample('H').mean()
+
+    def get_caiso_load(self):
+        months = pd.date_range(self.start, self.end, 
+              freq='MS').tolist()
+        monthly_load = []
+        for month in months:
+            start, end = self.get_month_day_range(month)
+            start = start.strftime('%Y-%m-%d')
+            end = end.strftime('%Y-%m-%d')
+            load = pd.DataFrame(
+                self.iso.get_load(
+                    latest=False,
+                    yesterday=False,
+                    start_at=start,
+                    end_at=end)
+            )[LOAD_COLS].set_index('timestamp')
+            monthly_load.append(load)
+        return pd.concat(monthly_load)
+
+    @staticmethod
+    def get_month_day_range(date):
+        """
+        For a date 'date' returns the start and end date for the month of 'date'.
+        Month with 31 days:
+        >>> date = datetime.date(2011, 7, 27)
+        >>> get_month_day_range(date)
+        (datetime.date(2011, 7, 1), datetime.date(2011, 7, 31))
+        Month with 28 days:
+        >>> date = datetime.date(2011, 2, 15)
+        >>> get_month_day_range(date)
+        (datetime.date(2011, 2, 1), datetime.date(2011, 2, 28))
+        """
+        last_day = date + relativedelta(day=1, months=+1, days=-1)
+        first_day = date + relativedelta(day=1)
+        return first_day, last_day
 
     def engineer_features(self):
         temperatures = dict()
