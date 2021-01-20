@@ -12,6 +12,7 @@ import pickle
 from pyiso import client_factory
 import requests
 from sklearn import preprocessing
+from timezonefinderL import TimezoneFinder
 
 
 GEO_COORDS = {
@@ -76,7 +77,9 @@ class LoadCollector:
                 start_at=self.start,
                 end_at=self.end)
             )[LOAD_COLS].set_index('timestamp')
-        load.index = load.index.tz_convert(EASTERN_TZ)
+        tz_finder = TimezoneFinder()
+        tz_name = tz_finder.timezone_at(lng=self.lon, lat=self.lat)
+        load.index = load.index.tz_convert(tz_name)
         return load.resample('H').mean()
 
     def engineer_features(self):
@@ -93,15 +96,16 @@ class LoadCollector:
         self.load['load (t-24)'] = self.load.load_MW.shift(24)
 
     def build_model_input(self):
-        self.model_input = self.dummify_categorical_features(self.load.copy())
-        self.model_input = self.standardize_numerical_features(self.model_input)
+        featurized_df = self.dummify_categorical_features(self.load.copy())
+        clean_df = featurized_df[featurized_df.notna()]
+        self.model_input = self.standardize_numerical_features(clean_df)
 
     @staticmethod
     def _set_iso(iso_name: str):
         if iso_name == 'NYISO':
             iso_engine = client_factory('NYISO')
         elif iso_name == 'ISONE':
-            iso_engine = client_factory('ISONE')
+            iso_engine = client_factory('ISONE', timeout_seconds=60)
         elif iso_name == 'CAISO':
             iso_engine = client_factory('CAISO')
         elif iso_name == 'ERCOT':
@@ -123,7 +127,11 @@ class LoadCollector:
                             f'Response Code {response.status_code}')
         info = response.json()
         current_info = info['currently']
-        return current_info['temperature']
+        try:
+            temp = current_info['temperature']
+        except KeyError:
+            temp = None 
+        return temp
 
     @staticmethod
     def _check_for_holiday(day):
