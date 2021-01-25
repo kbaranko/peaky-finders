@@ -12,7 +12,7 @@ from peaky_finders.data_acquisition.train_model import LoadCollector
 
 """
 CLI demo command:
-python peaky_finders/training_pipeline.py --iso NYISO --model xgboost --start_date 05-01-2020 --end_date 05-28-2020 --save_model_input True --save_model_output True
+python peaky_finders/training_pipeline.py --iso NYISO --model xgboost --start_date 01-01-2019 --end_date 07-28-2020 --save_model_input True --save_model_output True
 """
 
 
