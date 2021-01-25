@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import pickle
 from pyiso import client_factory
+from pyiso.eia_esod import EIAClient
 import requests
 from sklearn import preprocessing
 from timezonefinderL import TimezoneFinder
@@ -42,6 +43,11 @@ GEO_COORDS = {
             'lat': '39.9526',
             'lon': '-75.1652'
         },
+    'MISO':
+        {
+            'lat': '44.9778',
+            'lon': '93.2650',
+        },
 }
 
 
@@ -63,17 +69,19 @@ class LoadCollector:
         self.start = start_date
         self.end = end_date
         self.iso_name = iso
+        self.lat = GEO_COORDS[iso]['lat']
+        self.lon = GEO_COORDS[iso]['lon']
         self.iso = self._set_iso(iso)
         self.holidays = holidays.UnitedStates()
         self.load = self.get_historical_load()
         self.model_input = None
-        self.lat = GEO_COORDS[iso]['lat']
-        self.lon = GEO_COORDS[iso]['lon']
         self.weather_url = f'{BASE_URL}/{API_KEY}/{self.lat},{self.lon},'
 
     def get_historical_load(self) -> pd.DataFrame:
         if self.iso_name == 'CAISO':
             load = self.get_caiso_load()
+        elif self.iso_name == 'MISO' or self.iso_name == 'PJM' or self.iso_name == 'ERCOT':
+            load = self.get_eia_load()
         else:
             load = pd.DataFrame(
                 self.iso.get_load(
@@ -83,9 +91,20 @@ class LoadCollector:
                     end_at=self.end)
             )[LOAD_COLS].set_index('timestamp')
         tz_finder = TimezoneFinder()
-        tz_name = tz_finder.timezone_at(lng=self.lon, lat=self.lat)
+        tz_name = tz_finder.timezone_at(lng=float(self.lon), lat=float(self.lat))
         load.index = load.index.tz_convert(tz_name)
         return load.resample('H').mean()
+
+    def get_eia_load(self):
+        load = pd.DataFrame(
+                self.iso.get_load(
+                    latest=False,
+                    yesterday=False,
+                    start_at=self.start,
+                    end_at=self.end)
+            )
+        load = load.iloc[::-1]
+        return load[LOAD_COLS].set_index('timestamp')
 
     def get_caiso_load(self):
         months = pd.date_range(self.start, self.end, 
@@ -149,9 +168,14 @@ class LoadCollector:
         elif iso_name == 'CAISO':
             iso_engine = client_factory('CAISO')
         elif iso_name == 'ERCOT':
-            iso_engine = client_factory('ERCOT')
+            iso_engine = EIAClient(timeout_seconds=60)
+            iso_engine.BA = 'ERCOT'
         elif iso_name == 'PJM':
-            iso_engine = client_factory('PJM')
+            iso_engine = EIAClient(timeout_seconds=60)
+            iso_engine.BA = 'PJM'
+        elif iso_name == 'MISO':
+            iso_engine = EIAClient(timeout_seconds=60)
+            iso_engine.BA = 'MISO'
         else:
             print(f'Peaky Finders does not support {iso_name} yet!')
         return iso_engine
