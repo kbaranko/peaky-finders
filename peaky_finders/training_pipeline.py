@@ -25,7 +25,15 @@ MODEL_OUTPUT_DIR = os.path.join(
 
 class Pipeline:
 
-    def __init__(self, iso: str, model: str, start_date: str, end_date: str, save_model_input: bool, save_model_output: bool):
+    def __init__(
+        self,
+        iso: str,
+        model: str,
+        start_date: str,
+        end_date: str,
+        save_model_input: bool,
+        save_model_output: bool
+    ) -> None:
         """
         Args:
             iso: the iso to forecast ('nyiso', 'ercot', etc.)
@@ -124,4 +132,3 @@ if __name__ == "__main__":
         save_model_output=args.save_model_output
     )
     pipeline.execute()
-

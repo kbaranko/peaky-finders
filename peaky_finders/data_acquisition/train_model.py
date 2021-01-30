@@ -127,15 +127,7 @@ class LoadCollector:
     @staticmethod
     def get_month_day_range(date):
         """
-        For a date 'date' returns the start and end date for the month of 'date'.
-        Month with 31 days:
-        >>> date = datetime.date(2011, 7, 27)
-        >>> get_month_day_range(date)
-        (datetime.date(2011, 7, 1), datetime.date(2011, 7, 31))
-        Month with 28 days:
-        >>> date = datetime.date(2011, 2, 15)
-        >>> get_month_day_range(date)
-        (datetime.date(2011, 2, 1), datetime.date(2011, 2, 28))
+        Returns the start and end date for the month of 'date'.
         """
         last_day = date + relativedelta(day=1, months=+1, days=-1)
         first_day = date + relativedelta(day=1)
@@ -156,8 +148,7 @@ class LoadCollector:
 
     def build_model_input(self):
         featurized_df = self.dummify_categorical_features(self.load.copy())
-        clean_df = featurized_df[featurized_df.notna()]
-        self.model_input = self.standardize_numerical_features(clean_df)
+        self.model_input = featurized_df[featurized_df.notna()]
 
     @staticmethod
     def _set_iso(iso_name: str):
@@ -211,11 +202,4 @@ class LoadCollector:
             load_df = load_df.drop(feature, axis=1)
             load_df = pd.concat([load_df, dummies], axis=1)
             load_df = load_df.dropna(axis=0, how='any')
-        return load_df
-
-    @staticmethod
-    def standardize_numerical_features(load_df: pd.DataFrame):
-        z_scaler = preprocessing.StandardScaler()
-        load_df[NUMERICAL_FEATURES] = z_scaler.fit_transform(
-            load_df[NUMERICAL_FEATURES])
         return load_df
