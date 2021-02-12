@@ -2,6 +2,7 @@ import datetime as dt
 from datetime import timedelta
 import os
 import pickle
+from typing import Dict, Tuple
 
 import pandas as pd
 from timezonefinderL import TimezoneFinder
@@ -10,6 +11,8 @@ from peaky_finders.data_acquisition.train_model import (
     LoadCollector, GEO_COORDS, CATEGORICAL_FEATURES)
 from peaky_finders.training_pipeline import MODEL_OUTPUT_DIR
 
+
+ISO_LIST = ['NYISO', 'ISONE', 'CAISO', 'PJM', 'MISO']
 
 
 class Predictor:
@@ -62,3 +65,15 @@ class Predictor:
         predictions = xgb.predict(X)
         X['predicted_load'] = predictions
         return X, model_input
+
+
+def predict_all(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
+    predicted_load = {}
+    actual_load = {}
+    for iso in iso_list:
+        predictor = Predictor('PJM')
+        model_input = predictor.prepare_predictions()
+        predictions, model_input = predictor.predict_load(model_input)
+        predicted_load[iso] = predictions
+        actual_load[iso] = model_input
+    return predicted_load, actual_load
