@@ -45,6 +45,21 @@ GEO_COORDS = {
         },
 }
 
+MONTH_TO_SEASON = {
+    1: 'Winter',
+    2: 'Winter',
+    3: 'Spring',
+    4: 'Spring',
+    5: 'Spring',
+    6: 'Summer',
+    7: 'Summer',
+    8: 'Summer',
+    9: 'Fall',
+    10: 'Fall',
+    11: 'Fall',
+    12: 'Winter'
+}
+
 
 BASE_URL = 'https://api.darksky.net/forecast'
 EXCLUDE = 'flags, minutely, daily, alerts'
@@ -90,6 +105,17 @@ class LoadCollector:
         load.index = load.index.tz_convert(tz_name)
         return load.resample('H').mean()
 
+    def get_historical_peak_load(self) -> pd.DataFrame:
+        daily_peak = self.load.resample('D').max()
+        holiday_bool = dict()
+        for date, _ in daily_peak.iterrows():
+            holiday_bool[date] = self._check_for_holiday(date)
+        daily_peak['month'] = daily_peak.index.month_name()
+        daily_peak['season'] = daily_peak.index.month.map(MONTH_TO_SEASON)
+        daily_peak['weekday'] = daily_peak.index.day_name()
+        daily_peak['holiday'] = daily_peak.index.map(holiday_bool)
+        return daily_peak
+
     def get_eia_load(self):
         load = pd.DataFrame(
                 self.iso.get_load(
@@ -131,7 +157,6 @@ class LoadCollector:
     def engineer_features(self):
         temperatures = dict()
         holiday_bool = dict()
-        weekdays = dict()
         for date, _ in self.load.iterrows():
             temperatures[date] = self._get_temperature(date)
             holiday_bool[date] = self._check_for_holiday(date)
