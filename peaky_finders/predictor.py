@@ -64,16 +64,15 @@ class Predictor:
         X = model_input.drop('load_MW', axis=1).astype(float).dropna()
         predictions = xgb.predict(X)
         X['predicted_load'] = predictions
-        return X, model_input
+
+        return pd.concat([model_input['load_MW'], X['predicted_load'].drop_duplicates(keep='first')], axis=1)
 
 
 def predict_all(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
-    predicted_load = {}
-    actual_load = {}
+    load = {}
     for iso in iso_list:
         predictor = Predictor('PJM')
         model_input = predictor.prepare_predictions()
-        predictions, model_input = predictor.predict_load(model_input)
-        predicted_load[iso] = predictions
-        actual_load[iso] = model_input
-    return predicted_load, actual_load
+        load_df = predictor.predict_load(model_input)
+        load[iso] = load_df
+    return load
