@@ -6,47 +6,48 @@ import geopandas as gpd
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from shapely import wkt
 from scipy import stats
 
-from peaky_finders.predictor import predict_all, ISO_LIST, get_peak_data
+from peaky_finders.predictor import predict_all, ISO_LIST, get_peak_data, get_iso_map
 
-base_usa = gpd.read_file('usa-states-census-2014.shp')
-iso_df = pd.read_csv('simplified_iso_map.csv')
-iso_df['geometry'] = iso_df['geometry'].apply(wkt.loads)
-iso_map = gpd.GeoDataFrame(iso_df, crs="EPSG:4326", geometry='geometry').set_index('NAME')
+iso_map = get_iso_map()
 
 
-# peak_data = get_peak_data(ISO_LIST)
-# load, predictions = predict_all(ISO_LIST)
 
-# NYISO_PEAK = round(
-#     stats.percentileofscore(
-#         peak_data['NYISO']['load_MW'],
-#         predictions['NYISO'].iloc[-24:].values.max()
-#     ), 2)
+peak_data = get_peak_data(ISO_LIST)
+load, predictions = predict_all(ISO_LIST)
 
-# PJM_PEAK = round(
-#     stats.percentileofscore(
-#         peak_data['PJM']['load_MW'],
-#         predictions['PJM'].iloc[-24:].values.max()
-#     ), 2)
+PEAKS_24HR = {
+    'NYISO': round(
+        stats.percentileofscore(
+            peak_data['NYISO']['load_MW'],
+            predictions['NYISO'].iloc[-24:].values.max()
+        ), 2),
+    'PJM': round(
+        stats.percentileofscore(
+            peak_data['PJM']['load_MW'],
+            predictions['PJM'].iloc[-24:].values.max()
+        ), 2),
+    'ISONE': round(
+        stats.percentileofscore(
+            peak_data['ISONE']['load_MW'],
+            predictions['ISONE'].iloc[-24:].values.max()
+        ), 2),
+    'MISO': round(
+        stats.percentileofscore(
+            peak_data['MISO']['load_MW'],
+            predictions['MISO'].iloc[-24:].values.max()
+        ), 2)
+}
 
-# ISONE_PEAK = round(
-#     stats.percentileofscore(
-#         peak_data['ISONE']['load_MW'],
-#         predictions['ISONE'].iloc[-24:].values.max()
-#     ), 2)
+NYISO_PEAK = PEAKS_24HR['NYISO']
+PJM_PEAK = PEAKS_24HR['PJM']
+ISONE_PEAK = PEAKS_24HR['ISONE']
+MISO_PEAK = PEAKS_24HR['MISO']
+# CAISO_PEAK
 
-# MISO_PEAK = round(
-#     stats.percentileofscore(
-#         peak_data['MISO']['load_MW'],
-#         predictions['MISO'].iloc[-24:].values.max()
-#     ), 2)
-
-
-# fig.update_geos(fitbounds="locations", visible=False)
-
+iso_map['forecasted_peak'] = iso_map['iso'].map(PEAKS_24HR)
+iso_map['Forecasted Peak (MW Above System Mean)'] = iso_map['forecasted_peak'] - iso_map['AVG_LOAD']
 
 
 TEMPLATE = 'plotly_white'
@@ -89,24 +90,18 @@ index_page = html.Div([
                 ]
             )]),
         html.Div([
-            dcc.Graph(
-                figure=px.choropleth(
-                    iso_map,
-                   geojson=iso_map.geometry,
-                   locations=iso_map.index,
-                   color="PEAK_LOAD",
-                   projection="mercator"
-                ).update_geos(
-                    fitbounds="locations", visible=False
-                ).update_layout(height=600, margin={"r":0,"t":0,"l":0,"b":0})
-                # .add_trace(
-                #     px.choropleth(
-                #         base_usa,
-                #         geojson=base_usa.geometry,
-                #         locations=base_usa.index
-                #     )
-                # )
-            )
+            dcc.Graph(figure=px.choropleth(
+                        iso_map,
+                        geojson=iso_map.geometry,
+                        locations=iso_map.index,
+                        color="Forecasted Peak (MW Above System Mean)",
+                        projection="mercator").update_geos(
+                            fitbounds="locations",
+                            visible=False).update_layout(
+                                height=600,
+                                margin={"r":0,"t":0,"l":0,"b":0}
+                            )
+                        ) 
         ], style = {'display': 'inline-block', 'width': '90%'})
 ])
 

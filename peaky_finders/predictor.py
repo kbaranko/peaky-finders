@@ -4,8 +4,10 @@ import os
 import pickle
 from typing import Dict, Tuple
 
+import geopandas as gpd
 import pandas as pd
 import pytz, datetime
+from shapely import wkt
 from timezonefinderL import TimezoneFinder
 
 from peaky_finders.data_acquisition.train_model import (
@@ -13,7 +15,15 @@ from peaky_finders.data_acquisition.train_model import (
 from peaky_finders.training_pipeline import MODEL_OUTPUT_DIR
 
 
-ISO_LIST = ['NYISO', 'ISONE', 'CAISO', 'PJM', 'MISO']
+ISO_MAP_IDS = {
+    56669: 'MISO',
+    14725: 'PJM',
+    2775: 'CAISO',
+    13434: 'ISONE',
+    13501: 'NYISO'
+}
+
+ISO_LIST = ['NYISO', 'ISONE', 'PJM', 'MISO'] # add 'CAISO',
 
 PEAK_DATA = {
     'NYISO': 'NYISO_01-01-2018_01-01-2020.csv',
@@ -27,6 +37,14 @@ PEAK_DATA_PATH = os.path.join(
 
 
 tz_finder = TimezoneFinder()
+
+
+def get_iso_map():
+    iso_df = pd.read_csv('simplified_iso_map.csv')
+    iso_df['geometry'] = iso_df['geometry'].apply(wkt.loads)
+    iso_gdf = gpd.GeoDataFrame(iso_df, crs="EPSG:4326", geometry='geometry').set_index('NAME')
+    iso_gdf['iso'] = iso_gdf['ID'].map(ISO_MAP_IDS)
+    return iso_gdf
 
 class Predictor:
 
