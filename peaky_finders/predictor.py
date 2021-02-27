@@ -78,14 +78,14 @@ class Predictor:
         load = self.load_collector.load
         future = self.add_future(load)
         all_load = pd.concat([load, future])
-        self.load_collector.load = all_load
+        self.load_collector.load = all_load[-72:]
         self.load_collector.engineer_features()
         model_input = self.load_collector.load.copy()
         for feature in CATEGORICAL_FEATURES:
             dummies = pd.get_dummies(model_input[feature], prefix=feature, drop_first=True)
             model_input = model_input.drop(feature, axis=1)
             model_input = pd.concat([model_input, dummies], axis=1)
-        return model_input
+        return all_load.dropna(), model_input
 
     def predict_load(self, model_input: pd.DataFrame) -> Tuple[pd.Series, pd.Series]:
         model_path = os.path.join(MODEL_OUTPUT_DIR, (f'xg_boost_{self.iso_name}_load_model.pkl'))
@@ -93,9 +93,13 @@ class Predictor:
         if 'holiday_True' not in model_input.columns:
             model_input['holiday_True'] = 0
         X = model_input.drop('load_MW', axis=1).astype(float).dropna()
-        predictions = xgb.predict(X)
+        weekday_cols = [f'weekday_{i + 1}' for i in range(0,6)]
+        if len(set(weekday_cols) - set(X.columns)) > 0:
+            for col in list(set(weekday_cols) - set(X.columns)):
+                X[col] = 0
+        predictions = xgb.predict(X[xgb.get_booster().feature_names])
         X['predicted_load'] = predictions
-        return model_input['load_MW'].drop_duplicates(), X['predicted_load']
+        return X['predicted_load']
 
 
 def predict_all(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
@@ -103,9 +107,9 @@ def predict_all(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
     predicted_load = {}
     for iso in iso_list:
         predictor = Predictor(iso)
-        model_input = predictor.prepare_predictions()
-        load, predictions = predictor.predict_load(model_input)
-        historical_load[iso] = load
+        load, model_input = predictor.prepare_predictions()
+        predictions = predictor.predict_load(model_input)
+        historical_load[iso] = load['load_MW']
         predicted_load[iso] = predictions
     return historical_load, predicted_load
 
