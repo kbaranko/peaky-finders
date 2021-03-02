@@ -52,7 +52,7 @@ iso_map['Forecasted Peak Percentile'] = iso_map['iso'].map(PEAKS_24HR)
 TEMPLATE = 'plotly_white'
 
 app = dash.Dash(
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    external_stylesheets=[dbc.themes.LUX],
     suppress_callback_exceptions=True
 )
 
@@ -94,7 +94,9 @@ index_page = html.Div([
                         geojson=iso_map.geometry,
                         locations=iso_map.index,
                         color="Forecasted Peak Percentile",
-                        projection="mercator").update_geos(
+                        projection="mercator",
+                        color_continuous_scale = 'Reds',
+                        ).update_geos(
                             fitbounds="locations",
                             visible=False).update_layout(
                                 height=600,
@@ -111,6 +113,8 @@ nyiso_layout = html.Div([
     dcc.Link(
         html.Button('HOME', id='home-button', className="mr-1"),
         href='/'),
+    html.Br(),
+    html.Br(),
     html.H1('NYISO'),
     dcc.Dropdown(
         id='nyiso-dropdown',
@@ -199,6 +203,8 @@ pjm_layout = html.Div([
     dcc.Link(
         html.Button('HOME', id='home-button', className="mr-1"),
         href='/'),
+    html.Br(),
+    html.Br(),
     html.H1('PJM'),
     dcc.Dropdown(
         id='pjm-dropdown',
@@ -286,6 +292,8 @@ isone_layout = html.Div([
     dcc.Link(
         html.Button('HOME', id='home-button', className="mr-1"),
         href='/'),
+    html.Br(),
+    html.Br(),
     html.H1('ISONE'),
     dcc.Dropdown(
         id='isone-dropdown',
@@ -372,6 +380,8 @@ miso_layout = html.Div([
     dcc.Link(
         html.Button('HOME', id='home-button', className="mr-1"),
         href='/'),
+    html.Br(),
+    html.Br(),
     html.H1('MISO'),
     dcc.Dropdown(
         id='miso-dropdown',
