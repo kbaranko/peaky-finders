@@ -11,9 +11,6 @@ from scipy import stats
 from peaky_finders.predictor import predict_all, ISO_LIST, get_peak_data, get_iso_map
 
 iso_map = get_iso_map()
-
-
-
 peak_data = get_peak_data(ISO_LIST)
 load, predictions = predict_all(ISO_LIST)
 
@@ -55,6 +52,7 @@ app = dash.Dash(
     external_stylesheets=[dbc.themes.LUX],
     suppress_callback_exceptions=True
 )
+server = app.server
 
 """Homepage"""
 app.layout = html.Div([
@@ -64,6 +62,8 @@ app.layout = html.Div([
 
 index_page = html.Div([
         html.H1(children="Welcome to Peaky Finders"),
+        html.Br(),
+        html.Br(),
         html.Div([
             html.H4(children="Please select an ISO to get started."),
             html.Div(
@@ -136,7 +136,8 @@ nyiso_layout = html.Div([
                             x=peak_data['NYISO'].resample('D').max()['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Tomorrow's peak is in the {NYISO_PEAK} percentile of historical daily peaks."
+                            title=f"Tomorrow's peak is in the {NYISO_PEAK} percentile of historical daily peaks.",
+                            color_discrete_sequence=['darkturquoise'] 
                         ).add_vline(x=predictions['NYISO'].iloc[-24:].values.max()
                     ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
@@ -177,7 +178,7 @@ def plot_nyiso_load_(value):
             x=predictions['NYISO'].index,
             y=predictions['NYISO'].values,
             name = 'Forecasted Load',
-            line=dict(color='royalblue', width=3, dash='dash')))
+            line=dict(color='darkturquoise', width=3, dash='dash')))
     return fig.update_layout(
         title="System Load: Historical vs. Predicted",
         xaxis_title="Date",
@@ -226,7 +227,8 @@ pjm_layout = html.Div([
                             x=peak_data['PJM'].resample('D').max()['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Tomorrow's peak is in the {PJM_PEAK} percentile of historical daily peaks."
+                            title=f"Tomorrow's peak is in the {PJM_PEAK} percentile of historical daily peaks.",
+                            color_discrete_sequence=['darkturquoise']
                         ).add_vline(x=predictions['PJM'].iloc[-24:].values.max()
                     ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
@@ -266,7 +268,7 @@ def plot_pjm_load_(value):
             x=predictions['PJM'].index,
             y=predictions['PJM'].values,
             name = 'Forecasted Load',
-            line=dict(color='royalblue', width=3, dash='dash')))
+            line=dict(color='darkturquoise', width=3, dash='dash')))
     return fig.update_layout(
         title="System Load: Historical vs. Predicted",
         xaxis_title="Date",
@@ -315,7 +317,8 @@ isone_layout = html.Div([
                             x=peak_data['ISONE'].resample('D').max()['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Tomorrow's peak is in the {ISONE_PEAK} percentile of historical daily peaks."
+                            title=f"Tomorrow's peak is in the {ISONE_PEAK} percentile of historical daily peaks.",
+                            color_discrete_sequence=['darkturquoise']
                         ).add_vline(x=predictions['ISONE'].iloc[-24:].values.max()
                     ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
@@ -355,7 +358,7 @@ def plot_isone_load_(value):
             x=predictions['ISONE'].index,
             y=predictions['ISONE'].values,
             name = 'Forecasted Load',
-            line=dict(color='royalblue', width=3, dash='dash')))
+            line=dict(color='darkturquoise', width=3, dash='dash')))
     return fig.update_layout(
         title="System Load: Historical vs. Predicted",
         xaxis_title="Date",
@@ -403,7 +406,8 @@ miso_layout = html.Div([
                             x=peak_data['MISO'].resample('D').max()['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Tomorrow's peak is in the {MISO_PEAK} percentile of historical daily peaks."
+                            title=f"Tomorrow's peak is in the {MISO_PEAK} percentile of historical daily peaks.",
+                            color_discrete_sequence=['darkturquoise']
                         ).add_vline(x=predictions['MISO'].iloc[-24:].values.max()
                     ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
@@ -443,7 +447,7 @@ def plotMISO_load_(value):
             x=predictions['MISO'].index,
             y=predictions['MISO'].values,
             name = 'Forecasted Load',
-            line=dict(color='royalblue', width=3, dash='dash')))
+            line=dict(color='darkturquoise', width=3, dash='dash')))
     return fig.update_layout(
         title="System Load: Historical vs. Predicted",
         xaxis_title="Date",
