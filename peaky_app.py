@@ -34,14 +34,19 @@ PEAKS_24HR = {
         stats.percentileofscore(
             peak_data['MISO']['load_MW'],
             predictions['MISO'].iloc[-24:].values.max()
-        ), 2)
+        ), 2),
+    'CAISO': round(
+        stats.percentileofscore(
+            peak_data['CAISO']['load_MW'],
+            predictions['CAISO'].iloc[-24:].values.max()
+        ), 2),
 }
 
 NYISO_PEAK = PEAKS_24HR['NYISO']
 PJM_PEAK = PEAKS_24HR['PJM']
 ISONE_PEAK = PEAKS_24HR['ISONE']
 MISO_PEAK = PEAKS_24HR['MISO']
-# CAISO_PEAK
+CAISO_PEAK = PEAKS_24HR['CAISO']
 
 iso_map['Forecasted Peak Percentile'] = iso_map['iso'].map(PEAKS_24HR)
 
@@ -81,10 +86,10 @@ index_page = html.Div([
                         html.Button('ISONE', id='isone-button', className="mr-1"),
                         href='/isone'),
                     dcc.Link(
-                        html.Button('MISO', id='isone-button', className="mr-1"),
+                        html.Button('MISO', id='miso-button', className="mr-1"),
                         href='/miso'),
                     dcc.Link(
-                        html.Button('CAISO', id='isone-button', className="mr-1"),
+                        html.Button('CAISO', id='caiso-button', className="mr-1"),
                         href='/caiso')
                 ]
             )]),
@@ -467,6 +472,95 @@ def miso_scatter_plot(value):
     return fig.update_layout(template=TEMPLATE, title='Peak Load vs. Temperature')
 
 
+"""CAISO LAYOUT"""
+caiso_layout = html.Div([
+    html.Div(id='caiso-content'),
+    dcc.Link(
+        html.Button('HOME', id='home-button', className="mr-1"),
+        href='/'),
+    html.Br(),
+    html.Br(),
+    html.H1('CAISO'),
+    dcc.Dropdown(
+        id='caiso-dropdown',
+        options=[
+            {'label': 'Actual', 'value': 'Actual'},
+            {'label': 'Predicted', 'value': 'Predicted'}
+        ],
+        value=['Actual', 'Predicted'],
+        multi=True,
+    ),
+    dcc.Graph(id='caiso-graph'),
+    dbc.Row(
+        [
+            dbc.Col(
+                html.Div([
+                    dcc.Graph(
+                        figure=px.histogram(
+                            peak_data['CAISO'].resample('D').max(),
+                            x=peak_data['CAISO'].resample('D').max()['load_MW'],
+                            nbins=75,
+                            marginal="rug",
+                            title=f"Tomorrow's peak is in the {CAISO_PEAK} percentile of historical daily peaks.",
+                            color_discrete_sequence=['darkturquoise']
+                        ).add_vline(x=predictions['CAISO'].iloc[-24:].values.max()
+                    ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
+                ]
+            ), width=6),
+            dbc.Col(
+                html.Div([
+                    dcc.Dropdown(
+                        id='caiso-scatter-dropdown',
+                        options=[
+                            {'label': 'Day of Week', 'value': 'weekday'},
+                            {'label': 'Season', 'value': 'season'}
+                            ],
+                        value='season',
+                        multi=False,
+                    ),
+                    dcc.Graph(id='caiso-scatter')
+                ]
+            ), width=6),
+        ]
+    )
+])
+@app.callback(dash.dependencies.Output('caiso-content', 'children'),
+              [dash.dependencies.Input('caiso-button', 'value')])
+
+@app.callback(dash.dependencies.Output('caiso-graph', 'figure'),
+             [dash.dependencies.Input('caiso-dropdown', 'value')])
+def plotCAISO_load_(value):
+    fig = go.Figure()
+    if 'Actual' in value:
+        fig.add_trace(go.Scatter(
+            x=load['CAISO'].index,
+            y=load['CAISO'].values,
+            name='Historical Load',
+            line=dict(color='maroon', width=3)))
+    if 'Predicted' in value:
+        fig.add_trace(go.Scatter(
+            x=predictions['CAISO'].index,
+            y=predictions['CAISO'].values,
+            name = 'Forecasted Load',
+            line=dict(color='darkturquoise', width=3, dash='dash')))
+    return fig.update_layout(
+        title="System Load: Historical vs. Predicted",
+        xaxis_title="Date",
+        yaxis_title="Load (MW)",
+        template=TEMPLATE
+    )
+
+@app.callback(dash.dependencies.Output("caiso-scatter", "figure"), 
+    [dash.dependencies.Input("caiso-scatter-dropdown", "value")])
+def caiso_scatter_plot(value):
+    fig = px.scatter(
+        peak_data['CAISO'].resample('D').max().dropna(),
+        x="load_MW",
+        y="temperature", 
+        color=value
+    )
+    return fig.update_layout(template=TEMPLATE, title='Peak Load vs. Temperature')
+
 # Update the index
 @app.callback(dash.dependencies.Output('page-content', 'children'),
               [dash.dependencies.Input('url', 'pathname')])
@@ -479,6 +573,8 @@ def display_page(pathname):
         return isone_layout
     elif pathname == '/miso':
         return miso_layout
+    elif pathname == '/caiso':
+        return caiso_layout
     else:
         return index_page
 
