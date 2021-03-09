@@ -30,14 +30,6 @@ ISO_MAP_IDS = {
 
 ISO_LIST = ['NYISO', 'ISONE', 'PJM', 'MISO', 'CAISO']
 
-PEAK_DATA = {
-    'NYISO': 'NYISO_01-01-2019_07-28-2020.csv',
-    'PJM': 'PJM_01-01-2018_01-01-2021.csv',
-    'ISONE': 'ISONE_01-01-2019_07-28-2020.csv',
-    'MISO': 'MISO_01-01-2019_07-28-2020.csv',
-    'CAISO': 'CAISO_01-01-2018_01-01-2021.csv'
-}
-
 PEAK_DATA_PATH = os.path.join(
     os.path.dirname(__file__), 'historical_peaks')
 
