@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from scipy import stats
 
-from peaky_finders.predictor import predict_all, ISO_LIST, get_peak_data, get_iso_map
+from peaky_finders.predictor import create_load_duration, predict_all, ISO_LIST, get_peak_data, get_iso_map
 
 iso_map = get_iso_map()
 peak_data = get_peak_data(ISO_LIST)
@@ -50,10 +50,7 @@ CAISO_PEAK = PEAKS_24HR['CAISO']
 
 iso_map['Forecasted Peak Percentile'] = iso_map['iso'].map(PEAKS_24HR)
 
-load_duration_curves = {}
-for iso in ISO_LIST:
-    load_duration_curves[iso] = pd.Series(peak_data[iso]['load_MW'].values) \
-        .sort_values(ascending=False)
+load_duration_curves = create_load_duration(peak_data)
 
 
 TEMPLATE = 'plotly_white'
@@ -141,8 +138,13 @@ nyiso_layout = html.Div([
             peak_data['NYISO'],
             x=load_duration_curves['NYISO'].reset_index().index,
             y=load_duration_curves['NYISO'].values,
-            title='Life expectancy in Canada'
-        )
+            color_discrete_sequence=['maroon'] 
+            ).update_layout(
+                title="Peak Load Sorted by Hour (2019-2021)",
+                xaxis_title="Hour",
+                yaxis_title="Load (MW)",
+                template=TEMPLATE
+            ).add_hline(y=predictions['NYISO'].values.max(), line=dict(color='black', width=1, dash='dash'))
     ),
     dbc.Row(
         [
@@ -235,6 +237,19 @@ pjm_layout = html.Div([
         multi=True,
     ),
     dcc.Graph(id='pjm-graph'),
+    dcc.Graph(
+        figure=px.line(
+            peak_data['PJM'],
+            x=load_duration_curves['PJM'].reset_index().index,
+            y=load_duration_curves['PJM'].values,
+            color_discrete_sequence=['maroon'] 
+            ).update_layout(
+                title="Peak Load Sorted by Hour (2018-2021)",
+                xaxis_title="Hour",
+                yaxis_title="Load (MW)",
+                template=TEMPLATE
+            ).add_hline(y=predictions['PJM'].values.max(), line=dict(color='black', width=1, dash='dash'))
+    ),
     dbc.Row(
         [
             dbc.Col(
@@ -325,6 +340,19 @@ isone_layout = html.Div([
         multi=True,
     ),
     dcc.Graph(id='isone-graph'),
+    dcc.Graph(
+        figure=px.line(
+            peak_data['ISONE'],
+            x=load_duration_curves['ISONE'].reset_index().index,
+            y=load_duration_curves['ISONE'].values,
+            color_discrete_sequence=['maroon'] 
+            ).update_layout(
+                title="Peak Load Sorted by Hour (2019-2021)",
+                xaxis_title="Hour",
+                yaxis_title="Load (MW)",
+                template=TEMPLATE
+            ).add_hline(y=predictions['ISONE'].values.max(), line=dict(color='black', width=1, dash='dash'))
+    ),
     dbc.Row(
         [
             dbc.Col(
@@ -414,6 +442,19 @@ miso_layout = html.Div([
         multi=True,
     ),
     dcc.Graph(id='miso-graph'),
+    dcc.Graph(
+        figure=px.line(
+            peak_data['MISO'],
+            x=load_duration_curves['MISO'].reset_index().index,
+            y=load_duration_curves['MISO'].values,
+            color_discrete_sequence=['maroon'] 
+            ).update_layout(
+                title="Peak Load Sorted by Hour (2019-2021)",
+                xaxis_title="Hour",
+                yaxis_title="Load (MW)",
+                template=TEMPLATE
+            ).add_hline(y=predictions['MISO'].values.max(), line=dict(color='black', width=1, dash='dash'))
+    ),
     dbc.Row(
         [
             dbc.Col(
@@ -504,6 +545,19 @@ caiso_layout = html.Div([
         multi=True,
     ),
     dcc.Graph(id='caiso-graph'),
+    dcc.Graph(
+        figure=px.line(
+            peak_data['CAISO'],
+            x=load_duration_curves['CAISO'].reset_index().index,
+            y=load_duration_curves['CAISO'].values,
+            color_discrete_sequence=['maroon'] 
+            ).update_layout(
+                title="Peak Load Sorted by Hour (2018-2021)",
+                xaxis_title="Hour",
+                yaxis_title="Load (MW)",
+                template=TEMPLATE
+            ).add_hline(y=predictions['CAISO'].values.max(), line=dict(color='black', width=1, dash='dash'))
+    ),
     dbc.Row(
         [
             dbc.Col(

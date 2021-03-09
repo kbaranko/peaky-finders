@@ -29,7 +29,6 @@ ISO_MAP_IDS = {
 }
 
 ISO_LIST = ['NYISO', 'ISONE', 'PJM', 'MISO', 'CAISO']
-# ISO_LIST = ['PJM']
 
 PEAK_DATA = {
     'NYISO': 'NYISO_01-01-2019_07-28-2020.csv',
@@ -122,19 +121,6 @@ def predict_all(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
         predicted_load[iso] = predictions
     return historical_load, predicted_load
 
-# def get_peak_data(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
-#     peak_data = {}
-#     for iso in iso_list:
-#         iso_data = pd.read_csv(os.path.join(PEAK_DATA_PATH, PEAK_DATA[iso]), parse_dates=['timestamp'])
-#         iso_data['timestamp'] = iso_data['timestamp'].apply(lambda x: x.astimezone(pytz.utc))
-#         tz_name = tz_finder.timezone_at(lng=float(GEO_COORDS[iso]['lon']), lat=float(GEO_COORDS[iso]['lat']))
-#         iso_data.index = pd.DatetimeIndex(iso_data['timestamp'])
-#         iso_data.index = iso_data.index.tz_convert(tz_name)
-#         basics = iso_data[['load_MW', 'temperature']]
-#         basics['weekday'] = basics.index.day_name()
-#         basics['season'] = basics.index.month.map(MONTH_TO_SEASON)
-#         peak_data[iso] = basics
-#     return peak_data
 
 def get_peak_data(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
     peak_data = {}
@@ -168,8 +154,9 @@ def get_temperature_forecast(iso: str) -> dict:
         hourly_temp[timestamp] = info['temperature']
     return hourly_temp
 
-    # relevant_info = {
-    #     datetime.datetime.fromtimestamp(info['time']): info['temperature']
-    #     for info in hourly_data
-    # }
-    # return relevant_info
+def create_load_duration(peak_data: Dict[str, pd.DataFrame]) -> Dict[str, pd.Series]:
+    load_duration_curves = {}
+    for iso in ISO_LIST:
+        load_duration_curves[iso] = pd.Series(peak_data[iso]['load_MW'].values) \
+            .sort_values(ascending=False)
+    return load_duration_curves
