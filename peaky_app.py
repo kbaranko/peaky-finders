@@ -50,6 +50,11 @@ CAISO_PEAK = PEAKS_24HR['CAISO']
 
 iso_map['Forecasted Peak Percentile'] = iso_map['iso'].map(PEAKS_24HR)
 
+load_duration_curves = {}
+for iso in ISO_LIST:
+    load_duration_curves[iso] = pd.Series(peak_data[iso]['load_MW'].values) \
+        .sort_values(ascending=False)
+
 
 TEMPLATE = 'plotly_white'
 
@@ -131,6 +136,14 @@ nyiso_layout = html.Div([
         multi=True,
     ),
     dcc.Graph(id='nyiso-graph'),
+    dcc.Graph(
+        figure=px.line(
+            peak_data['NYISO'],
+            x=load_duration_curves['NYISO'].reset_index().index,
+            y=load_duration_curves['NYISO'].values,
+            title='Life expectancy in Canada'
+        )
+    ),
     dbc.Row(
         [
             dbc.Col(
