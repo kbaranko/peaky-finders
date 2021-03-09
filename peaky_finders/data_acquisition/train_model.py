@@ -119,7 +119,7 @@ class LoadCollector:
     def get_eia_load(self):
         load = pd.DataFrame(
                 self.iso.get_load(
-                    latest=False,
+                    latest=True,
                     yesterday=False,
                     start_at=self.start,
                     end_at=self.end)
@@ -128,8 +128,10 @@ class LoadCollector:
         return load[LOAD_COLS].set_index('timestamp')
 
     def get_caiso_load(self):
-        months = pd.date_range(self.start, self.end, 
-              freq='MS').tolist()
+        if pd.Timestamp(self.start).month == pd.Timestamp(self.end).month:
+            months = [pd.Timestamp(self.start)]
+        else:
+            months = pd.date_range(self.start, self.end, freq='MS').tolist()
         monthly_load = []
         for month in months:
             start, end = self.get_month_day_range(month)
@@ -163,6 +165,16 @@ class LoadCollector:
         self.load['weekday'] = self.load.index.dayofweek
         self.load['hour_of_day'] = self.load.index.hour
         self.load['temperature'] = self.load.index.map(temperatures)
+        self.load['holiday'] = self.load.index.map(holiday_bool)
+        self.load['load (t-24)'] = self.load.load_MW.shift(24)
+
+    def engineer_features_lite(self, weather_dict: dict):
+        holiday_bool = dict()
+        for date, _ in self.load.iterrows():
+            holiday_bool[date] = self._check_for_holiday(date)
+        self.load['weekday'] = self.load.index.dayofweek
+        self.load['hour_of_day'] = self.load.index.hour
+        self.load['temperature'] = self.load.index.map(pd.Series(weather_dict))
         self.load['holiday'] = self.load.index.map(holiday_bool)
         self.load['load (t-24)'] = self.load.load_MW.shift(24)
 

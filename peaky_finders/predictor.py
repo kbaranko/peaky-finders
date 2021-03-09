@@ -1,5 +1,6 @@
 import datetime as dt
 from datetime import timedelta
+import requests
 import os
 import pickle
 from typing import Dict, Tuple
@@ -13,6 +14,10 @@ from timezonefinderL import TimezoneFinder
 from peaky_finders.data_acquisition.train_model import (
     LoadCollector, GEO_COORDS, CATEGORICAL_FEATURES, MONTH_TO_SEASON)
 from peaky_finders.training_pipeline import MODEL_OUTPUT_DIR
+from peaky_finders.data_acquisition.train_model import GEO_COORDS
+
+
+API_KEY = os.environ['DARKSKY_KEY']
 
 
 ISO_MAP_IDS = {
@@ -24,6 +29,7 @@ ISO_MAP_IDS = {
 }
 
 ISO_LIST = ['NYISO', 'ISONE', 'PJM', 'MISO', 'CAISO']
+# ISO_LIST = ['PJM']
 
 PEAK_DATA = {
     'NYISO': 'NYISO_01-01-2019_07-28-2020.csv',
@@ -34,7 +40,7 @@ PEAK_DATA = {
 }
 
 PEAK_DATA_PATH = os.path.join(
-    os.path.dirname(__file__), 'training_data')
+    os.path.dirname(__file__), 'historical_peaks')
 
 
 tz_finder = TimezoneFinder()
@@ -74,13 +80,13 @@ class Predictor:
         future.index = future.index.tz_convert(tz_name)
         return future
 
-    def prepare_predictions(self):
+    def prepare_predictions(self, weather_dict: dict):
         self.get_load()
         load = self.load_collector.load
         future = self.add_future(load)
         all_load = pd.concat([load, future])
         self.load_collector.load = all_load[-72:]
-        self.load_collector.engineer_features()
+        self.load_collector.engineer_features_lite(weather_dict)
         model_input = self.load_collector.load.copy()
         for feature in CATEGORICAL_FEATURES:
             dummies = pd.get_dummies(model_input[feature], prefix=feature, drop_first=True)
@@ -91,6 +97,7 @@ class Predictor:
     def predict_load(self, model_input: pd.DataFrame) -> Tuple[pd.Series, pd.Series]:
         model_path = os.path.join(MODEL_OUTPUT_DIR, (f'xg_boost_{self.iso_name}_load_model.pkl'))
         xgb = pickle.load(open(model_path, "rb"))
+        
         if 'holiday_True' not in model_input.columns:
             model_input['holiday_True'] = 0
         X = model_input.drop('load_MW', axis=1).astype(float).dropna()
@@ -108,22 +115,61 @@ def predict_all(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
     predicted_load = {}
     for iso in iso_list:
         predictor = Predictor(iso)
-        load, model_input = predictor.prepare_predictions()
+        weather_dict = get_temperature_forecast(iso)
+        load, model_input = predictor.prepare_predictions(weather_dict)
         predictions = predictor.predict_load(model_input)
         historical_load[iso] = load['load_MW']
         predicted_load[iso] = predictions
     return historical_load, predicted_load
 
+# def get_peak_data(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
+#     peak_data = {}
+#     for iso in iso_list:
+#         iso_data = pd.read_csv(os.path.join(PEAK_DATA_PATH, PEAK_DATA[iso]), parse_dates=['timestamp'])
+#         iso_data['timestamp'] = iso_data['timestamp'].apply(lambda x: x.astimezone(pytz.utc))
+#         tz_name = tz_finder.timezone_at(lng=float(GEO_COORDS[iso]['lon']), lat=float(GEO_COORDS[iso]['lat']))
+#         iso_data.index = pd.DatetimeIndex(iso_data['timestamp'])
+#         iso_data.index = iso_data.index.tz_convert(tz_name)
+#         basics = iso_data[['load_MW', 'temperature']]
+#         basics['weekday'] = basics.index.day_name()
+#         basics['season'] = basics.index.month.map(MONTH_TO_SEASON)
+#         peak_data[iso] = basics
+#     return peak_data
+
 def get_peak_data(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
     peak_data = {}
     for iso in iso_list:
-        iso_data = pd.read_csv(os.path.join(PEAK_DATA_PATH, PEAK_DATA[iso]), parse_dates=['timestamp'])
+        iso_data = pd.read_csv(os.path.join(PEAK_DATA_PATH, f'{iso}_historical_peaks.csv'), parse_dates=['timestamp'])
         iso_data['timestamp'] = iso_data['timestamp'].apply(lambda x: x.astimezone(pytz.utc))
         tz_name = tz_finder.timezone_at(lng=float(GEO_COORDS[iso]['lon']), lat=float(GEO_COORDS[iso]['lat']))
         iso_data.index = pd.DatetimeIndex(iso_data['timestamp'])
         iso_data.index = iso_data.index.tz_convert(tz_name)
-        basics = iso_data[['load_MW', 'temperature']]
-        basics['weekday'] = basics.index.day_name()
-        basics['season'] = basics.index.month.map(MONTH_TO_SEASON)
-        peak_data[iso] = basics
+        peak_data[iso] = iso_data
     return peak_data
+
+
+def get_temperature_forecast(iso: str) -> dict:
+    lon = GEO_COORDS[iso]['lon']
+    lat = GEO_COORDS[iso]['lat']
+    url = f'https://api.darksky.net/forecast/{API_KEY}/{lat},{lon}'
+    response = requests.get(url)
+    if response.status_code == 200:
+        print(response.status_code)
+    else: 
+        raise ValueError(f'Error getting data from DarkSky API: '
+                         f'Response Code {response.status_code}')
+    info = response.json()
+    hourly_data = info['hourly']['data']
+    hourly_temp = {}
+    for info in hourly_data:
+        timestamp = datetime.datetime.fromtimestamp(info['time'])
+        tz = tz_finder.timezone_at(lng=float(lon), lat=float(lat))
+        timestamp = timestamp.astimezone(pytz.timezone(tz))
+        hourly_temp[timestamp] = info['temperature']
+    return hourly_temp
+
+    # relevant_info = {
+    #     datetime.datetime.fromtimestamp(info['time']): info['temperature']
+    #     for info in hourly_data
+    # }
+    # return relevant_info

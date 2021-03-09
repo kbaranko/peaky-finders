@@ -18,27 +18,27 @@ PEAKS_24HR = {
     'NYISO': round(
         stats.percentileofscore(
             peak_data['NYISO']['load_MW'],
-            predictions['NYISO'].iloc[-24:].values.max()
+            predictions['NYISO'].values.max()
         ), 2),
     'PJM': round(
         stats.percentileofscore(
             peak_data['PJM']['load_MW'],
-            predictions['PJM'].iloc[-24:].values.max()
+            predictions['PJM'].values.max()
         ), 2),
     'ISONE': round(
         stats.percentileofscore(
             peak_data['ISONE']['load_MW'],
-            predictions['ISONE'].iloc[-24:].values.max()
+            predictions['ISONE'].values.max()
         ), 2),
     'MISO': round(
         stats.percentileofscore(
             peak_data['MISO']['load_MW'],
-            predictions['MISO'].iloc[-24:].values.max()
+            predictions['MISO'].values.max()
         ), 2),
     'CAISO': round(
         stats.percentileofscore(
             peak_data['CAISO']['load_MW'],
-            predictions['CAISO'].iloc[-24:].values.max()
+            predictions['CAISO'].values.max()
         ), 2),
 }
 
@@ -137,13 +137,13 @@ nyiso_layout = html.Div([
                 html.Div([
                     dcc.Graph(
                         figure=px.histogram(
-                            peak_data['NYISO'].resample('D').max(),
-                            x=peak_data['NYISO'].resample('D').max()['load_MW'],
+                            peak_data['NYISO'],
+                            x=peak_data['NYISO']['load_MW'],
                             nbins=75,
                             marginal="rug",
                             title=f"Tomorrow's peak is in the {NYISO_PEAK} percentile of historical daily peaks.",
                             color_discrete_sequence=['darkturquoise'] 
-                        ).add_vline(x=predictions['NYISO'].iloc[-24:].values.max()
+                        ).add_vline(x=predictions['NYISO'].values.max()
                     ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
@@ -195,7 +195,7 @@ def plot_nyiso_load_(value):
     [dash.dependencies.Input("nyiso-scatter-dropdown", "value")])
 def nyiso_scatter_plot(value):
     fig = px.scatter(
-        peak_data['NYISO'].resample('D').max(),
+        peak_data['NYISO'],
         x="load_MW",
         y="temperature", 
         color=value
@@ -228,13 +228,13 @@ pjm_layout = html.Div([
                 html.Div([
                     dcc.Graph(
                         figure=px.histogram(
-                            peak_data['PJM'].resample('D').max(),
-                            x=peak_data['PJM'].resample('D').max()['load_MW'],
+                            peak_data['PJM'],
+                            x=peak_data['PJM']['load_MW'],
                             nbins=75,
                             marginal="rug",
                             title=f"Tomorrow's peak is in the {PJM_PEAK} percentile of historical daily peaks.",
                             color_discrete_sequence=['darkturquoise']
-                        ).add_vline(x=predictions['PJM'].iloc[-24:].values.max()
+                        ).add_vline(x=predictions['PJM'].values.max()
                     ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
@@ -285,7 +285,7 @@ def plot_pjm_load_(value):
     [dash.dependencies.Input("pjm-scatter-dropdown", "value")])
 def pjm_scatter_plot(value):
     fig = px.scatter(
-        peak_data['PJM'].resample('D').max(),
+        peak_data['PJM'],
         x="load_MW",
         y="temperature", 
         color=value
@@ -318,13 +318,13 @@ isone_layout = html.Div([
                 html.Div([
                     dcc.Graph(
                         figure=px.histogram(
-                            peak_data['ISONE'].resample('D').max(),
-                            x=peak_data['ISONE'].resample('D').max()['load_MW'],
+                            peak_data['ISONE'],
+                            x=peak_data['ISONE']['load_MW'],
                             nbins=75,
                             marginal="rug",
                             title=f"Tomorrow's peak is in the {ISONE_PEAK} percentile of historical daily peaks.",
                             color_discrete_sequence=['darkturquoise']
-                        ).add_vline(x=predictions['ISONE'].iloc[-24:].values.max()
+                        ).add_vline(x=predictions['ISONE'].values.max()
                     ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
@@ -375,7 +375,7 @@ def plot_isone_load_(value):
     [dash.dependencies.Input("isone-scatter-dropdown", "value")])
 def isone_scatter_plot(value):
     fig = px.scatter(
-        peak_data['ISONE'].resample('D').max(),
+        peak_data['ISONE'],
         x="load_MW",
         y="temperature", 
         color=value
@@ -407,13 +407,13 @@ miso_layout = html.Div([
                 html.Div([
                     dcc.Graph(
                         figure=px.histogram(
-                            peak_data['MISO'].resample('D').max(),
-                            x=peak_data['MISO'].resample('D').max()['load_MW'],
+                            peak_data['MISO'],
+                            x=peak_data['MISO']['load_MW'],
                             nbins=75,
                             marginal="rug",
                             title=f"Tomorrow's peak is in the {MISO_PEAK} percentile of historical daily peaks.",
                             color_discrete_sequence=['darkturquoise']
-                        ).add_vline(x=predictions['MISO'].iloc[-24:].values.max()
+                        ).add_vline(x=predictions['MISO'].values.max()
                     ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
@@ -464,7 +464,7 @@ def plotMISO_load_(value):
     [dash.dependencies.Input("miso-scatter-dropdown", "value")])
 def miso_scatter_plot(value):
     fig = px.scatter(
-        peak_data['MISO'].resample('D').max(),
+        peak_data['MISO'],
         x="load_MW",
         y="temperature", 
         color=value
@@ -497,13 +497,13 @@ caiso_layout = html.Div([
                 html.Div([
                     dcc.Graph(
                         figure=px.histogram(
-                            peak_data['CAISO'].resample('D').max(),
-                            x=peak_data['CAISO'].resample('D').max()['load_MW'],
+                            peak_data['CAISO'],
+                            x=peak_data['CAISO']['load_MW'],
                             nbins=75,
                             marginal="rug",
                             title=f"Tomorrow's peak is in the {CAISO_PEAK} percentile of historical daily peaks.",
                             color_discrete_sequence=['darkturquoise']
-                        ).add_vline(x=predictions['CAISO'].iloc[-24:].values.max()
+                        ).add_vline(x=predictions['CAISO'].values.max()
                     ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
@@ -554,7 +554,7 @@ def plotCAISO_load_(value):
     [dash.dependencies.Input("caiso-scatter-dropdown", "value")])
 def caiso_scatter_plot(value):
     fig = px.scatter(
-        peak_data['CAISO'].resample('D').max().dropna(),
+        peak_data['CAISO'].dropna(),
         x="load_MW",
         y="temperature", 
         color=value
