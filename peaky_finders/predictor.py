@@ -51,7 +51,7 @@ class Predictor:
         self.load_collector: LoadCollector = None
 
     def get_load(self):
-        begin = (dt.datetime.today() - timedelta(days=7)).strftime('%Y-%m-%d %H')
+        begin = (dt.datetime.today() - timedelta(days=3)).strftime('%Y-%m-%d %H')
         end = pd.datetime.today().strftime('%Y-%m-%d %H')
         self.load_collector = LoadCollector(self.iso_name, begin, end)
 
