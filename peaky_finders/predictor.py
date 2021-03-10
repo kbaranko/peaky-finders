@@ -117,11 +117,7 @@ def predict_all(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
 def get_peak_data(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
     peak_data = {}
     for iso in iso_list:
-        # iso_data = pd.read_csv(os.path.join(PEAK_DATA_PATH, f'{iso}_historical_peaks.csv'), parse_dates=['timestamp'])
-        # path = 'https://github.com/kbaranko/peaky-finders/tree/master/peaky_finders/historical_peaks'
-        # path = 'https://raw.githubusercontent.com/kbaranko/peaky-finders/peaky_finders/historical_peaks'
         path = 'https://raw.githubusercontent.com/kbaranko/peaky-finders/master/peaky_finders/historical_peaks'
-        import pdb; pdb.set_trace()
         iso_data = pd.read_csv(f'{path}/{iso}_historical_peaks.csv', parse_dates=['timestamp'])
         iso_data['timestamp'] = iso_data['timestamp'].apply(lambda x: x.astimezone(pytz.utc))
         tz_name = tz_finder.timezone_at(lng=float(GEO_COORDS[iso]['lon']), lat=float(GEO_COORDS[iso]['lat']))
