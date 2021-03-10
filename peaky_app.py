@@ -11,8 +11,8 @@ from scipy import stats
 from peaky_finders.predictor import create_load_duration, predict_all, ISO_LIST, get_peak_data, get_iso_map
 
 iso_map = get_iso_map()
-peak_data = get_peak_data(ISO_LIST)
-load, predictions = predict_all(ISO_LIST)
+# peak_data = get_peak_data(ISO_LIST)
+# load, predictions = predict_all(ISO_LIST)
 
 PEAKS_24HR = {
     'NYISO': round(
