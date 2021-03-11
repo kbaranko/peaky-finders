@@ -167,7 +167,8 @@ def get_forecasts(iso_list: List[str]):
     historical_load = {}
     temperature = {}
     for iso in iso_list:
-        iso_data = pd.read_csv(f'peaky_finders/forecasts/{iso}_forecasts.csv', parse_dates=['timestamp'])
+        path = f'https://raw.githubusercontent.com/kbaranko/peaky-finders/master/peaky_finders/forecasts/{iso}_forecasts.csv'
+        iso_data = pd.read_csv(path, parse_dates=['timestamp'])
         iso_data['timestamp'] = iso_data['timestamp'].apply(lambda x: x.astimezone(pytz.utc))
         tz_name = tz_finder.timezone_at(lng=float(GEO_COORDS[iso]['lon']), lat=float(GEO_COORDS[iso]['lat']))
         iso_data.index = pd.DatetimeIndex(iso_data['timestamp'])
