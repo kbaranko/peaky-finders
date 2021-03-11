@@ -8,48 +8,21 @@ import plotly.graph_objects as go
 import plotly.express as px
 from scipy import stats
 
-from peaky_finders.predictor import create_load_duration, predict_all, ISO_LIST, get_peak_data, get_iso_map
+from peaky_finders.predictor import create_load_duration, predict_all, ISO_LIST, get_peak_data, get_iso_map, get_forecasts
 
 iso_map = get_iso_map()
-# peak_data = get_peak_data(ISO_LIST)
-# load, predictions = predict_all(ISO_LIST)
+peak_data = get_peak_data(ISO_LIST)
+predictions, load, temperature = get_forecasts(ISO_LIST)
 
-PEAKS_24HR = {
-    'NYISO': round(
-        stats.percentileofscore(
-            peak_data['NYISO']['load_MW'],
-            predictions['NYISO'].values.max()
-        ), 2),
-    'PJM': round(
-        stats.percentileofscore(
-            peak_data['PJM']['load_MW'],
-            predictions['PJM'].values.max()
-        ), 2),
-    'ISONE': round(
-        stats.percentileofscore(
-            peak_data['ISONE']['load_MW'],
-            predictions['ISONE'].values.max()
-        ), 2),
-    'MISO': round(
-        stats.percentileofscore(
-            peak_data['MISO']['load_MW'],
-            predictions['MISO'].values.max()
-        ), 2),
-    'CAISO': round(
-        stats.percentileofscore(
-            peak_data['CAISO']['load_MW'],
-            predictions['CAISO'].values.max()
-        ), 2),
+ISO_AVG = {
+    'NYISO': peak_data['NYISO']['load_MW'].mean(),
+    'PJM': peak_data['PJM']['load_MW'].mean(),
+    'ISONE': peak_data['ISONE']['load_MW'].mean(),
+    'MISO': peak_data['MISO']['load_MW'].mean(),
+    'CAISO': peak_data['CAISO']['load_MW'].mean(),
 }
 
-NYISO_PEAK = PEAKS_24HR['NYISO']
-PJM_PEAK = PEAKS_24HR['PJM']
-ISONE_PEAK = PEAKS_24HR['ISONE']
-MISO_PEAK = PEAKS_24HR['MISO']
-CAISO_PEAK = PEAKS_24HR['CAISO']
-
-iso_map['Forecasted Peak Percentile'] = iso_map['iso'].map(PEAKS_24HR)
-
+iso_map['Mean ISO Load'] = iso_map['iso'].map(ISO_AVG)
 load_duration_curves = create_load_duration(peak_data)
 
 
@@ -100,7 +73,7 @@ index_page = html.Div([
                         iso_map,
                         geojson=iso_map.geometry,
                         locations=iso_map.index,
-                        color="Forecasted Peak Percentile",
+                        color="Mean ISO Load",
                         projection="mercator",
                         color_continuous_scale = 'Reds',
                         ).update_geos(
@@ -144,7 +117,7 @@ nyiso_layout = html.Div([
                 xaxis_title="Hour",
                 yaxis_title="Load (MW)",
                 template=TEMPLATE
-            ).add_hline(y=predictions['NYISO'].values.max(), line=dict(color='black', width=1, dash='dash'))
+        ),
     ),
     dbc.Row(
         [
@@ -156,10 +129,9 @@ nyiso_layout = html.Div([
                             x=peak_data['NYISO']['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Tomorrow's peak is in the {NYISO_PEAK} percentile of historical daily peaks.",
+                            title=f"Distribution of NYISO Peaks from 2018-2021",
                             color_discrete_sequence=['darkturquoise'] 
-                        ).add_vline(x=predictions['NYISO'].values.max()
-                    ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
+                        ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
             dbc.Col(
@@ -248,7 +220,7 @@ pjm_layout = html.Div([
                 xaxis_title="Hour",
                 yaxis_title="Load (MW)",
                 template=TEMPLATE
-            ).add_hline(y=predictions['PJM'].values.max(), line=dict(color='black', width=1, dash='dash'))
+            ),
     ),
     dbc.Row(
         [
@@ -260,10 +232,9 @@ pjm_layout = html.Div([
                             x=peak_data['PJM']['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Tomorrow's peak is in the {PJM_PEAK} percentile of historical daily peaks.",
+                            title=f"Distribution of PJM Peaks from 2018-2021",
                             color_discrete_sequence=['darkturquoise']
-                        ).add_vline(x=predictions['PJM'].values.max()
-                    ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
+                        ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
             dbc.Col(
@@ -351,7 +322,7 @@ isone_layout = html.Div([
                 xaxis_title="Hour",
                 yaxis_title="Load (MW)",
                 template=TEMPLATE
-            ).add_hline(y=predictions['ISONE'].values.max(), line=dict(color='black', width=1, dash='dash'))
+            ),
     ),
     dbc.Row(
         [
@@ -363,10 +334,9 @@ isone_layout = html.Div([
                             x=peak_data['ISONE']['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Tomorrow's peak is in the {ISONE_PEAK} percentile of historical daily peaks.",
+                            title=f"Distribution of ISONE Peaks from 2018-2021",
                             color_discrete_sequence=['darkturquoise']
-                        ).add_vline(x=predictions['ISONE'].values.max()
-                    ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
+                        ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
             dbc.Col(
@@ -453,7 +423,7 @@ miso_layout = html.Div([
                 xaxis_title="Hour",
                 yaxis_title="Load (MW)",
                 template=TEMPLATE
-            ).add_hline(y=predictions['MISO'].values.max(), line=dict(color='black', width=1, dash='dash'))
+            ),
     ),
     dbc.Row(
         [
@@ -465,10 +435,9 @@ miso_layout = html.Div([
                             x=peak_data['MISO']['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Tomorrow's peak is in the {MISO_PEAK} percentile of historical daily peaks.",
+                            title=f"Distribution of MISO Peaks from 2018-2021.",
                             color_discrete_sequence=['darkturquoise']
-                        ).add_vline(x=predictions['MISO'].values.max()
-                    ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
+                        ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
             dbc.Col(
@@ -556,7 +525,7 @@ caiso_layout = html.Div([
                 xaxis_title="Hour",
                 yaxis_title="Load (MW)",
                 template=TEMPLATE
-            ).add_hline(y=predictions['CAISO'].values.max(), line=dict(color='black', width=1, dash='dash'))
+            ),
     ),
     dbc.Row(
         [
@@ -568,10 +537,9 @@ caiso_layout = html.Div([
                             x=peak_data['CAISO']['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Tomorrow's peak is in the {CAISO_PEAK} percentile of historical daily peaks.",
+                            title=f"Distribution of CAISO Peaks from 2018-2021",
                             color_discrete_sequence=['darkturquoise']
-                        ).add_vline(x=predictions['CAISO'].values.max()
-                    ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
+                        ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
                 ]
             ), width=6),
             dbc.Col(
