@@ -52,20 +52,20 @@ index_page = html.Div([
                         html.Button('HOME', id='home-button', className="mr-1"),
                         href='/'),
                     dcc.Link(
-                        html.Button('NYISO', id='nyiso-button', className="mr-1"),
-                        href='/nyiso'),
-                    dcc.Link(
-                        html.Button('PJM', id='pjm-button', className="mr-1"),
-                        href='/pjm'),
-                    dcc.Link(
-                        html.Button('ISONE', id='isone-button', className="mr-1"),
-                        href='/isone'),
+                        html.Button('CAISO', id='caiso-button', className="mr-1"),
+                        href='/caiso'),
                     dcc.Link(
                         html.Button('MISO', id='miso-button', className="mr-1"),
                         href='/miso'),
                     dcc.Link(
-                        html.Button('CAISO', id='caiso-button', className="mr-1"),
-                        href='/caiso')
+                        html.Button('PJM', id='pjm-button', className="mr-1"),
+                        href='/pjm'),
+                    dcc.Link(
+                        html.Button('NYISO', id='nyiso-button', className="mr-1"),
+                        href='/nyiso'),
+                    dcc.Link(
+                        html.Button('ISONE', id='isone-button', className="mr-1"),
+                        href='/isone'),
                 ]
             )]),
         html.Div([
@@ -90,9 +90,28 @@ index_page = html.Div([
 """NYISO LAYOUT"""
 nyiso_layout = html.Div([
     html.Div(id='nyiso-content'),
-    dcc.Link(
-        html.Button('HOME', id='home-button', className="mr-1"),
-        href='/'),
+    html.Div(
+        [
+            dcc.Link(
+                html.Button('HOME', id='home-button', className="mr-1"),
+                href='/'),
+            dcc.Link(
+                html.Button('CAISO', id='caiso-button', className="mr-1"),
+                href='/caiso'),
+            dcc.Link(
+                html.Button('MISO', id='miso-button', className="mr-1"),
+                href='/miso'),
+            dcc.Link(
+                html.Button('PJM', id='pjm-button', className="mr-1"),
+                href='/pjm'),
+            dcc.Link(
+                html.Button('NYISO', id='nyiso-button', className="mr-1"),
+                href='/nyiso'),
+            dcc.Link(
+                html.Button('ISONE', id='isone-button', className="mr-1"),
+                href='/isone'),
+            ]
+    ),
     html.Br(),
     html.Br(),
     html.H1('NYISO'),
@@ -193,9 +212,28 @@ def nyiso_scatter_plot(value):
 """PJM LAYOUT"""
 pjm_layout = html.Div([
     html.Div(id='pjm-content'),
-    dcc.Link(
-        html.Button('HOME', id='home-button', className="mr-1"),
-        href='/'),
+    html.Div(
+        [
+            dcc.Link(
+                html.Button('HOME', id='home-button', className="mr-1"),
+                href='/'),
+            dcc.Link(
+                html.Button('CAISO', id='caiso-button', className="mr-1"),
+                href='/caiso'),
+            dcc.Link(
+                html.Button('MISO', id='miso-button', className="mr-1"),
+                href='/miso'),
+            dcc.Link(
+                html.Button('PJM', id='pjm-button', className="mr-1"),
+                href='/pjm'),
+            dcc.Link(
+                html.Button('NYISO', id='nyiso-button', className="mr-1"),
+                href='/nyiso'),
+            dcc.Link(
+                html.Button('ISONE', id='isone-button', className="mr-1"),
+                href='/isone'),
+            ]
+    ),
     html.Br(),
     html.Br(),
     html.H1('PJM'),
@@ -295,9 +333,28 @@ def pjm_scatter_plot(value):
 """ISONE LAYOUT"""
 isone_layout = html.Div([
     html.Div(id='isone-content'),
-    dcc.Link(
-        html.Button('HOME', id='home-button', className="mr-1"),
-        href='/'),
+    html.Div(
+        [
+            dcc.Link(
+                html.Button('HOME', id='home-button', className="mr-1"),
+                href='/'),
+            dcc.Link(
+                html.Button('CAISO', id='caiso-button', className="mr-1"),
+                href='/caiso'),
+            dcc.Link(
+                html.Button('MISO', id='miso-button', className="mr-1"),
+                href='/miso'),
+            dcc.Link(
+                html.Button('PJM', id='pjm-button', className="mr-1"),
+                href='/pjm'),
+            dcc.Link(
+                html.Button('NYISO', id='nyiso-button', className="mr-1"),
+                href='/nyiso'),
+            dcc.Link(
+                html.Button('ISONE', id='isone-button', className="mr-1"),
+                href='/isone'),
+            ]
+    ),
     html.Br(),
     html.Br(),
     html.H1('ISONE'),
@@ -396,9 +453,28 @@ def isone_scatter_plot(value):
 """MISO LAYOUT"""
 miso_layout = html.Div([
     html.Div(id='miso-content'),
-    dcc.Link(
-        html.Button('HOME', id='home-button', className="mr-1"),
-        href='/'),
+    html.Div(
+        [
+            dcc.Link(
+                html.Button('HOME', id='home-button', className="mr-1"),
+                href='/'),
+            dcc.Link(
+                html.Button('CAISO', id='caiso-button', className="mr-1"),
+                href='/caiso'),
+            dcc.Link(
+                html.Button('MISO', id='miso-button', className="mr-1"),
+                href='/miso'),
+            dcc.Link(
+                html.Button('PJM', id='pjm-button', className="mr-1"),
+                href='/pjm'),
+            dcc.Link(
+                html.Button('NYISO', id='nyiso-button', className="mr-1"),
+                href='/nyiso'),
+            dcc.Link(
+                html.Button('ISONE', id='isone-button', className="mr-1"),
+                href='/isone'),
+            ]
+    ),
     html.Br(),
     html.Br(),
     html.H1('MISO'),
@@ -498,9 +574,28 @@ def miso_scatter_plot(value):
 """CAISO LAYOUT"""
 caiso_layout = html.Div([
     html.Div(id='caiso-content'),
-    dcc.Link(
-        html.Button('HOME', id='home-button', className="mr-1"),
-        href='/'),
+    html.Div(
+        [
+            dcc.Link(
+                html.Button('HOME', id='home-button', className="mr-1"),
+                href='/'),
+            dcc.Link(
+                html.Button('CAISO', id='caiso-button', className="mr-1"),
+                href='/caiso'),
+            dcc.Link(
+                html.Button('MISO', id='miso-button', className="mr-1"),
+                href='/miso'),
+            dcc.Link(
+                html.Button('PJM', id='pjm-button', className="mr-1"),
+                href='/pjm'),
+            dcc.Link(
+                html.Button('NYISO', id='nyiso-button', className="mr-1"),
+                href='/nyiso'),
+            dcc.Link(
+                html.Button('ISONE', id='isone-button', className="mr-1"),
+                href='/isone'),
+            ]
+    ),
     html.Br(),
     html.Br(),
     html.H1('CAISO'),
