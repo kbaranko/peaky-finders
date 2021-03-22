@@ -41,33 +41,41 @@ app.layout = html.Div([
     ])
 
 index_page = html.Div([
-        html.H1(children="Welcome to Peaky Finders"),
+        dbc.Row([
+            dbc.Col(html.H1(children="Welcome to Peaky Finders"), width=5),
+            dbc.Col(width=3),
+        ], justify='center'),
         html.Br(),
         html.Br(),
-        html.Div([
-            html.H4(children="Please select an ISO to get started."),
-            html.Div(
-                [
-                    dcc.Link(
-                        html.Button('HOME', id='home-button', className="mr-1"),
-                        href='/'),
-                    dcc.Link(
-                        html.Button('CAISO', id='caiso-button', className="mr-1"),
-                        href='/caiso'),
-                    dcc.Link(
-                        html.Button('MISO', id='miso-button', className="mr-1"),
-                        href='/miso'),
-                    dcc.Link(
-                        html.Button('PJM', id='pjm-button', className="mr-1"),
-                        href='/pjm'),
-                    dcc.Link(
-                        html.Button('NYISO', id='nyiso-button', className="mr-1"),
-                        href='/nyiso'),
-                    dcc.Link(
-                        html.Button('ISONE', id='isone-button', className="mr-1"),
-                        href='/isone'),
-                ]
-            )]),
+        dbc.Row([
+            dbc.Col(
+                html.Div([
+                    html.H4(children="Please select an ISO to get started."),
+                    html.Div(
+                        [
+                            dcc.Link(
+                                html.Button('HOME', id='home-button', className="mr-1"),
+                                href='/'),
+                            dcc.Link(
+                                html.Button('CAISO', id='caiso-button', className="mr-1"),
+                                href='/caiso'),
+                            dcc.Link(
+                                html.Button('MISO', id='miso-button', className="mr-1"),
+                                href='/miso'),
+                            dcc.Link(
+                                html.Button('PJM', id='pjm-button', className="mr-1"),
+                                href='/pjm'),
+                            dcc.Link(
+                                html.Button('NYISO', id='nyiso-button', className="mr-1"),
+                                href='/nyiso'),
+                            dcc.Link(
+                                html.Button('ISONE', id='isone-button', className="mr-1"),
+                                href='/isone'),
+                        ]
+                )]), width=5
+            ),
+            dbc.Col(width=3),
+        ], justify="center"),
         html.Div([
             dcc.Graph(figure=px.choropleth(
                         iso_map,
@@ -90,54 +98,95 @@ index_page = html.Div([
 """NYISO LAYOUT"""
 nyiso_layout = html.Div([
     html.Div(id='nyiso-content'),
-    html.Div(
-        [
-            dcc.Link(
-                html.Button('HOME', id='home-button', className="mr-1"),
-                href='/'),
-            dcc.Link(
-                html.Button('CAISO', id='caiso-button', className="mr-1"),
-                href='/caiso'),
-            dcc.Link(
-                html.Button('MISO', id='miso-button', className="mr-1"),
-                href='/miso'),
-            dcc.Link(
-                html.Button('PJM', id='pjm-button', className="mr-1"),
-                href='/pjm'),
-            dcc.Link(
-                html.Button('NYISO', id='nyiso-button', className="mr-1"),
-                href='/nyiso'),
-            dcc.Link(
-                html.Button('ISONE', id='isone-button', className="mr-1"),
-                href='/isone'),
-            ]
-    ),
+    html.Br(),
+    dbc.Row([
+        dbc.Col(
+            html.Div(
+                [
+                    dcc.Link(
+                        html.Button('HOME', id='home-button', className="mr-1"),
+                        href='/'),
+                    dcc.Link(
+                        html.Button('CAISO', id='caiso-button', className="mr-1"),
+                        href='/caiso'),
+                    dcc.Link(
+                        html.Button('MISO', id='miso-button', className="mr-1"),
+                        href='/miso'),
+                    dcc.Link(
+                        html.Button('PJM', id='pjm-button', className="mr-1"),
+                        href='/pjm'),
+                    dcc.Link(
+                        html.Button('NYISO', id='nyiso-button', className="mr-1"),
+                        href='/nyiso'),
+                    dcc.Link(
+                        html.Button('ISONE', id='isone-button', className="mr-1"),
+                        href='/isone'),
+                ]
+            ), width=4),
+        dbc.Col(width=7),
+    ], justify='center'),
     html.Br(),
     html.Br(),
-    html.H1('NYISO'),
-    dcc.Dropdown(
-        id='nyiso-dropdown',
-        options=[
-            {'label': 'Actual', 'value': 'Actual'},
-            {'label': 'Predicted', 'value': 'Predicted'}
-        ],
-        value=['Actual', 'Predicted'],
-        multi=True,
-    ),
-    dcc.Graph(id='nyiso-graph'),
-    dcc.Graph(
-        figure=px.line(
-            peak_data['NYISO'],
-            x=load_duration_curves['NYISO'].reset_index().index,
-            y=load_duration_curves['NYISO'].values,
-            color_discrete_sequence=['maroon'] 
-            ).update_layout(
-                title="Peak Load Sorted by Hour (2019-2021)",
-                xaxis_title="Hour",
-                yaxis_title="Load (MW)",
-                template=TEMPLATE
+    dbc.Row([
+        dbc.Col(html.H1('New York Independent System Operator (NYISO)'), width=9),
+        dbc.Col(width=2),
+    ], justify='center'),
+    dbc.Row([
+        dbc.Col(
+        html.Div(children='''
+            NYISO is the organization responsible for managing New York’s electric
+            grid and its competitive wholesale electric marketplace. For more information,
+            visit https://www.nyiso.com/.
+        '''), width=9),
+        dbc.Col(width=2)
+    ], justify='center'),
+    html.Br(),
+    dbc.Row([
+        dbc.Col(
+            html.H3('Model Performance'), width=9
         ),
-    ),
+        dbc.Col(width=2),
+    ], justify='center'),
+    dbc.Row([
+        dbc.Col(
+            html.Div(
+                children='''Mean Absolute Error (MAE) for February, 2021: XXXX'''
+            ), width=9
+        ),
+        dbc.Col(width=2),
+    ], justify='center'),
+    html.Br(),
+    dbc.Row([
+        dbc.Col(
+                dcc.Dropdown(
+                    id='nyiso-dropdown',
+                    options=[
+                        {'label': 'Actual', 'value': 'Actual'},
+                        {'label': 'Predicted', 'value': 'Predicted'}
+                    ],
+                    value=['Actual', 'Predicted'],
+                    multi=True,
+                ), width=6
+        ),
+        dbc.Col(width=5),
+    ], justify='center'),
+    dcc.Graph(id='nyiso-graph'),
+    html.Br(),
+    html.Br(),
+    dbc.Row([
+        dbc.Col(html.H3('Training Data'), width=9),
+        dbc.Col(width=2)
+    ], justify='center'),
+    dbc.Row([
+        dbc.Col(
+                html.Div(children='''
+                    The NYISO forecasting model was trained on historical load and weather data
+                    from 2018-2021. Temperature readings were from New York City.
+                '''), width=9
+        ),
+        dbc.Col(width=2)
+    ], justify='center'),
+    html.Br(),
     dbc.Row(
         [
             dbc.Col(
@@ -148,11 +197,32 @@ nyiso_layout = html.Div([
                             x=peak_data['NYISO']['load_MW'],
                             nbins=75,
                             marginal="rug",
-                            title=f"Distribution of NYISO Peaks from 2018-2021",
+                            title=f"Distribution of NYISO Daily Peaks",
                             color_discrete_sequence=['darkturquoise'] 
-                        ).update_layout(template=TEMPLATE, xaxis_title='Historical Peak Load (MW)')),
-                ]
-            ), width=6),
+                        ).update_layout(
+                            template=TEMPLATE,
+                            xaxis_title='Peak Load (MW)',
+                            yaxis_title='Number of Days'
+                        )
+                    ),
+                ]), width=4),
+            dbc.Col(
+                html.Div([
+                    dcc.Graph(
+                        figure=go.Figure().add_trace(
+                            go.Scatter(
+                                x=load_duration_curves['NYISO'].reset_index().index,
+                                y=load_duration_curves['NYISO'].values,
+                                mode = 'lines',
+                                fill='tozeroy',
+                                line=dict(color='maroon', width=3)
+                            )).update_layout(
+                                title="Peak Load Sorted by Day (Highest to Lowest)",
+                                xaxis_title="Number of Days",
+                                yaxis_title="Load (MW)",
+                                template=TEMPLATE),
+                        ),
+                    ]), width=4),
             dbc.Col(
                 html.Div([
                     dcc.Dropdown(
@@ -166,9 +236,9 @@ nyiso_layout = html.Div([
                     ),
                     dcc.Graph(id='nyiso-scatter')
                 ]
-            ), width=6),
+            ), width=4),
         ]
-    )
+    ),
 ])
 @app.callback(dash.dependencies.Output('nyiso-content', 'children'),
               [dash.dependencies.Input('nyiso-button', 'value')])
@@ -182,7 +252,7 @@ def plot_nyiso_load_(value):
         fig.add_trace(go.Scatter(
             x=load['NYISO'].index,
             y=load['NYISO'].values,
-            name='Historical Load',
+            name='Actual Load',
             line=dict(color='maroon', width=3)))
     if 'Predicted' in value:
         fig.add_trace(go.Scatter(
@@ -191,7 +261,7 @@ def plot_nyiso_load_(value):
             name = 'Forecasted Load',
             line=dict(color='darkturquoise', width=3, dash='dash')))
     return fig.update_layout(
-        title="System Load: Historical vs. Predicted",
+        title="System Load: Actual vs. Predicted",
         xaxis_title="Date",
         yaxis_title="Load (MW)",
         template=TEMPLATE
@@ -212,6 +282,7 @@ def nyiso_scatter_plot(value):
 """PJM LAYOUT"""
 pjm_layout = html.Div([
     html.Div(id='pjm-content'),
+    html.Br(),
     html.Div(
         [
             dcc.Link(
@@ -333,6 +404,7 @@ def pjm_scatter_plot(value):
 """ISONE LAYOUT"""
 isone_layout = html.Div([
     html.Div(id='isone-content'),
+    html.Br(),
     html.Div(
         [
             dcc.Link(
@@ -453,6 +525,7 @@ def isone_scatter_plot(value):
 """MISO LAYOUT"""
 miso_layout = html.Div([
     html.Div(id='miso-content'),
+    html.Br(),
     html.Div(
         [
             dcc.Link(
@@ -574,6 +647,7 @@ def miso_scatter_plot(value):
 """CAISO LAYOUT"""
 caiso_layout = html.Div([
     html.Div(id='caiso-content'),
+    html.Br(),
     html.Div(
         [
             dcc.Link(
