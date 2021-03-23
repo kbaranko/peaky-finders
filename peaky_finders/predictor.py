@@ -40,10 +40,10 @@ tz_finder = TimezoneFinder()
 
 
 def get_iso_map():
-    iso_df = pd.read_csv('simplified_iso_map.csv')
+    iso_df = pd.read_csv('iso_hopes.csv')
     iso_df['geometry'] = iso_df['geometry'].apply(wkt.loads)
-    iso_gdf = gpd.GeoDataFrame(iso_df, crs="EPSG:4326", geometry='geometry').set_index('NAME')
-    iso_gdf['iso'] = iso_gdf['ID'].map(ISO_MAP_IDS)
+    iso_gdf = gpd.GeoDataFrame(iso_df, crs="EPSG:4326", geometry='geometry')
+    # iso_gdf['iso'] = iso_gdf['ID'].map(ISO_MAP_IDS)
     return iso_gdf
 
 class Predictor:

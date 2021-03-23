@@ -22,7 +22,7 @@ ISO_AVG = {
     'CAISO': peak_data['CAISO']['load_MW'].mean(),
 }
 
-iso_map['Mean ISO Load'] = iso_map['iso'].map(ISO_AVG)
+# iso_map['Mean ISO Load'] = iso_map['iso'].map(ISO_AVG)
 load_duration_curves = create_load_duration(peak_data)
 
 
@@ -76,19 +76,26 @@ index_page = html.Div([
             ),
             dbc.Col(width=3),
         ], justify="center"),
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        html.Br(),
         html.Div([
             dcc.Graph(figure=px.choropleth(
                         iso_map,
                         geojson=iso_map.geometry,
                         locations=iso_map.index,
-                        color="Mean ISO Load",
+                        # locationmode = 'USA-states',
+                        color="NAME",
                         projection="mercator",
-                        color_continuous_scale = 'Reds',
+                        # color_continuous_scale = 'Reds',
                         ).update_geos(
                             fitbounds="locations",
                             visible=False).update_layout(
                                 height=600,
-                                margin={"r":0,"t":0,"l":0,"b":0}
+                                margin={"r":0,"t":0,"l":0,"b":0},
+                                # geo_scope='usa',
+                                title_text = '2011 US Agriculture Exports by State',
                             )
                         ) 
         ], style = {'display': 'inline-block', 'width': '90%'})
