@@ -679,7 +679,7 @@ isone_layout = html.Div([
     html.Br(),
     html.Br(),
     dbc.Row([
-        dbc.Col(html.H1('New York Independent System Operator (ISONE)'), width=9),
+        dbc.Col(html.H1('Independent System Operator of New England (ISONE)'), width=9),
         dbc.Col(width=2),
     ], justify='center'),
     dbc.Row([
@@ -864,7 +864,7 @@ caiso_layout = html.Div([
     html.Br(),
     html.Br(),
     dbc.Row([
-        dbc.Col(html.H1('Cali iso (CAISO)'), width=9),
+        dbc.Col(html.H1('California Independent System Operator (CAISO)'), width=9),
         dbc.Col(width=2),
     ], justify='center'),
     dbc.Row([
