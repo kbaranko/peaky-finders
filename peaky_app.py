@@ -42,7 +42,7 @@ index_page = html.Div([
         dbc.Row([
             dbc.Col(
                 html.Div([
-                    html.H4(children="To what extent does weather and weekday determine electricity demand? Click one of the ISO buttons below to find out."),
+                    html.H4(children="To what extent do weather and weekday determine total electricity demand on the grid? Click an ISO button below to find out."),
                     html.Div(
                         [
                             dcc.Link(

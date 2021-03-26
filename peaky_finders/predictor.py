@@ -54,8 +54,6 @@ class Predictor:
         self.load_collector: LoadCollector = None
 
     def get_load(self, start: str, end: str):
-        # begin = (dt.datetime.today() - timedelta(days=3)).strftime('%Y-%m-%d %H')
-        # end = pd.datetime.today().strftime('%Y-%m-%d %H')
         self.load_collector = LoadCollector(self.iso_name, start, end)
 
     def featurize(self):
@@ -77,10 +75,6 @@ class Predictor:
     def prepare_predictions(self):
         self.get_load(self.start, self.end)
         load = self.load_collector.load
-        # future = self.add_future(load)
-        # all_load = pd.concat([load, future])
-        # self.load_collector.load = all_load[-72:]
-        # self.load_collector.engineer_features_lite(weather_dict)
         self.load_collector.engineer_features()
         model_input = self.load_collector.load.copy()
         for feature in CATEGORICAL_FEATURES:
