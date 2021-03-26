@@ -43,19 +43,20 @@ def get_iso_map():
     iso_df = pd.read_csv('iso_map_final.csv')
     iso_df['geometry'] = iso_df['geometry'].apply(wkt.loads)
     iso_gdf = gpd.GeoDataFrame(iso_df, crs="EPSG:4326", geometry='geometry')
-    # iso_gdf['iso'] = iso_gdf['ID'].map(ISO_MAP_IDS)
     return iso_gdf
 
 class Predictor:
 
-    def __init__(self, iso_name: str) -> None:
+    def __init__(self, iso_name: str, start: str, end: str) -> None:
+        self.start = start
+        self.end = end
         self.iso_name = iso_name
         self.load_collector: LoadCollector = None
 
-    def get_load(self):
-        begin = (dt.datetime.today() - timedelta(days=3)).strftime('%Y-%m-%d %H')
-        end = pd.datetime.today().strftime('%Y-%m-%d %H')
-        self.load_collector = LoadCollector(self.iso_name, begin, end)
+    def get_load(self, start: str, end: str):
+        # begin = (dt.datetime.today() - timedelta(days=3)).strftime('%Y-%m-%d %H')
+        # end = pd.datetime.today().strftime('%Y-%m-%d %H')
+        self.load_collector = LoadCollector(self.iso_name, start, end)
 
     def featurize(self):
         self.load_collector.engineer_features()
@@ -73,24 +74,24 @@ class Predictor:
         future.index = future.index.tz_convert(tz_name)
         return future
 
-    def prepare_predictions(self, weather_dict: dict):
-        self.get_load()
+    def prepare_predictions(self):
+        self.get_load(self.start, self.end)
         load = self.load_collector.load
-        future = self.add_future(load)
-        all_load = pd.concat([load, future])
-        self.load_collector.load = all_load[-72:]
-        self.load_collector.engineer_features_lite(weather_dict)
+        # future = self.add_future(load)
+        # all_load = pd.concat([load, future])
+        # self.load_collector.load = all_load[-72:]
+        # self.load_collector.engineer_features_lite(weather_dict)
+        self.load_collector.engineer_features()
         model_input = self.load_collector.load.copy()
         for feature in CATEGORICAL_FEATURES:
             dummies = pd.get_dummies(model_input[feature], prefix=feature, drop_first=True)
             model_input = model_input.drop(feature, axis=1)
             model_input = pd.concat([model_input, dummies], axis=1)
-        return all_load.dropna(), model_input
+        return model_input, load
 
     def predict_load(self, model_input: pd.DataFrame) -> Tuple[pd.Series, pd.Series]:
         model_path = os.path.join(MODEL_OUTPUT_DIR, (f'xg_boost_{self.iso_name}_load_model.pkl'))
         xgb = pickle.load(open(model_path, "rb"))
-        
         if 'holiday_True' not in model_input.columns:
             model_input['holiday_True'] = 0
         X = model_input.drop('load_MW', axis=1).astype(float).dropna()
@@ -109,17 +110,15 @@ def predict_load(self, ):
         model_path = os.path.join(MODEL_OUTPUT_DIR, (f'xg_boost_{self.iso_name}_load_model.pkl'))
 
 
-def predict_all(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
-    historical_load = {}
-    predicted_load = {}
+def predict_all(iso_list: list, start: str, end: str) -> Tuple[Dict[str, pd.DataFrame]]:
+    historical_vs_predicted = {}
     for iso in iso_list:
-        predictor = Predictor(iso)
-        weather_dict = get_temperature_forecast(iso)
-        load, model_input = predictor.prepare_predictions(weather_dict)
+        predictor = Predictor(iso, start, end)
+        model_input, historical_load = predictor.prepare_predictions()
         predictions = predictor.predict_load(model_input)
-        historical_load[iso] = load['load_MW']
-        predicted_load[iso] = predictions
-    return historical_load, predicted_load
+        comparison_df = pd.concat([model_input, predictions], axis=1)[['load_MW', 'predicted_load']]
+        historical_vs_predicted[iso] = comparison_df
+    return historical_vs_predicted
 
 
 def get_peak_data(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
