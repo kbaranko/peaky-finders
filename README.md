@@ -1,6 +1,8 @@
 # Peaky-Finders
 
-This peak load forecasting application provides two helpful predictions for New York City building owners, facility managers, and residents interested in tomorrow's total electricity grid demand. The first model is a next-day hourly load curve for the NYISO. The second is a confidence interval representing the percent chance that tomorrow will be a peak load event. 
+Peaky Finders is a Plotly Dash application with helpful peak load visualizations and a day ahead forecasting model for five different ISOs. It does not demonstrate cutting-edge peak load forecasting methods -- there are a handful of high tech companies and millions of dollars spent trying to solve this problem -- but rather illustrate core concepts and explore how well a model can do with just historical load and temperature data.
+
+The application has been deployed on Heroku: https://peaky-finders.herokuapp.com/
 
 ## Tech Stack
 
@@ -8,81 +10,27 @@ This peak load forecasting application provides two helpful predictions for New 
 - Pandas
 - Matplotlib
 - Scikit-Learn
-- Flask
 - Dash 
 - Plotly
 
 ## Data
 
-For data collection, I used the PYISO open-source library to scrape hourly electricity load data from the NYISO website and the DarkSky API to gather hourly weather data. The binary classifier model weas trained on peak load seasons from 2013 through 2018 and tested on the 2019 peak load season. The load curve regression model was trained on ISO load data from 2016 through 2019 (four years) and tested using train-test split. I defined a peak load season as the days between June 15 and September 15. Data was cleaned and categorical variables one-hot encoded. 
-
-Shown below is the distribution of days and the peak load recorded during that day. 
-
-![Distribution of Summer Days](images/peak_day_distribution.png)
+Historical load data was collected using the Pyiso python library, which provides clean API interfaces to make scraping ISO websites easy. The Darksky API was used for weather data, which provides historical temperature readings for a given latitude and longitude. For this model, I picked one central coordinate in each ISO territory to make API requests.
 
 ## Features
 
-- Previous day value
-- Moving average (previous 24-48 hours) 
-- Hour of day (Load curve only)
-- Day of week 
-- Holiday
-- Temperature
-- UV Index
-- Humidity
-- Cloud Cover
+- Day of week (seven days)
+- Holiday (yes or no)
+- Hour of Day (24 hours)
+- Temperature Reading (hourly)
+- Previous Day’s Load (t-24)
 
+## Results 
 
-## Forecasted Load Curve
+How well does each model perform? Depends on the ISO. Mean Absolute Error (MAE) for the month of February 2021 in Megawatts (MW):
 
-This model was framed as a supervised learning problem in order to compare the performance of a Regression Tree, Random Forest Regressor, and XG Boost algorithms. XG Boost performed the best with a Root Mean Squared Error (RMSE) of 895.14 Megawatts (MW) for the 2019 peak season. The official NYISO day-ahead forecast published on the website had a RMSE of 901.05 MW for the first two weeks of September 2019.
-
-![Illustration of load forecasts for early September 2019](images/load_forecast_illustration.png)
-
-The most important features were temperature, previous day load and weekend/weekday.  
-
-![XG Boost Feature Importance](images/xg_boost_feature_importance.png)
-
-
-## Peak Day Binary Classifier 
-
-This logistic regression model classifies whether the next day will be a peak load day. To account for the sample's disparity in peak (1) and non-peak (0) days, I used the SMOTE algorithm when training the model. The final version was tuned to only include the most important features.
-
-### Coefficients used to calculate confidence interval
-- Temperature: 2.884
-- Saturday: -1.327 
-- Sunday: -1.292 
-- Holiday (true): -0.74
-- Previous day peak load (t-1): 0.76
-
-The model uses a .25 threshold value, rather than the standard .5 in order to eliminate false negatives. This had the effect of producing the following evaluation metrics:
-- Accuracy: 0.755
-- Recall: 1.00
-- Precision: 0.113
-- ROC / AUC Score: 0.873
-
-![Results](images/confusion_matrix_log.png)
-
-## Front End App
-
-The front end consists of a Dash application running both models. The top of the homepage renders the last week of historical load data and the projected load curve. Below the two visuals, the app outputs the confidence interval of the logistic regression model. 
-
-![Interactive Dashboard](images/updated_image.png)
-
-
-## Conclusion
-
-Ongoing testing is needed to compare the performance of this XG Boost model for dates that do not fall during peak season. Additionally, these models were trained on actual weather data - testing performance using day-ahead weather forecasts would be helpful to ensure there is no deviance in accuracy. Reviewing the literature on how best to account for discrepancies in weather measurements throughout different areas of the same ISO territory would help to further improve accuracy. 
-
-In practice, the threshold value of .25 for the logistic regression model could be improved by using cost-based classification. It would require working with the building owners relying on this model to calculate the true cost of false positives and false negatives as they relate to their cost of demand response activity, then determining the best cutoff based on these metrics. 
-
-I am looking forward to adding forecasts for other ISOs, continuously improving the models, and adding customized features to calculate ICAP tags. 
-
-Link to [slideshow](https://docs.google.com/presentation/d/1AdA7OE8VJQxQF6DAVs81xLXPfjvnHUb99oBfRkqpB7M/edit#slide=id.g6bd401033a_0_275) 
-
-## Coming Soon 
-- Blog Post 
-- Error metrics 
-- More ISOs (PJM will be next)
-- Customized amount of peak days targeting based on each utility's ICAP tag 
-- More nuanced weather inputs
+- CAISO: 455.91
+- MISO: 2,382.66 
+- PJM: 2,886.66
+- NYISO: 347.62
+- ISONE: 522.43
