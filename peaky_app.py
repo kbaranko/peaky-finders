@@ -518,7 +518,7 @@ miso_layout = html.Div([
     dbc.Row([
         dbc.Col(
             html.Div(
-                children='''Mean Absolute Error (MAE) for February, 2021: 2382.66 (not great)'''
+                children='''Mean Absolute Error (MAE) for February, 2021: 2,382.66 (not great)'''
             ), width=9
         ),
         dbc.Col(width=2),
