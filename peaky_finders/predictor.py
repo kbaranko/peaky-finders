@@ -22,9 +22,6 @@ from peaky_finders.training_pipeline import MODEL_OUTPUT_DIR, MODEL_INPUT_DIR
 from peaky_finders.data_acquisition.train_model import GEO_COORDS
 
 
-API_KEY = os.environ["DARKSKY_KEY"]
-
-
 ISO_MAP_IDS = {
     56669: "MISO",
     14725: "PJM",
@@ -144,9 +141,10 @@ def get_peak_data(iso_list: list) -> Tuple[Dict[str, pd.DataFrame]]:
 
 
 def get_temperature_forecast(iso: str) -> dict:
-    lon = GEO_COORDS[iso]["lon"]
-    lat = GEO_COORDS[iso]["lat"]
-    url = f"https://api.darksky.net/forecast/{API_KEY}/{lat},{lon}"
+    lon = GEO_COORDS[iso]['lon']
+    lat = GEO_COORDS[iso]['lat']
+    API_KEY = os.environ['DARKSKY_KEY']
+    url = f'https://api.darksky.net/forecast/{API_KEY}/{lat},{lon}'
     response = requests.get(url)
     if response.status_code == 200:
         print(response.status_code)
