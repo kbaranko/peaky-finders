@@ -41,8 +41,8 @@ MONTH_TO_SEASON = {
 }
 
 
-BASE_URL = 'https://api.darksky.net/forecast'
-EXCLUDE = 'flags, minutely, daily, alerts'
+BASE_URL = "https://api.darksky.net/forecast"
+EXCLUDE = "flags, minutely, daily, alerts"
 
 LOAD_COLS = ["load_MW", "timestamp"]
 EASTERN_TZ = "US/Eastern"
