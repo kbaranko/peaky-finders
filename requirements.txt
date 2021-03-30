@@ -82,7 +82,7 @@ prometheus-client==0.9.0
 prompt-toolkit==3.0.9
 ptyprocess==0.7.0
 pycparser==2.20
-Pygments==2.7.3
+Pygments==2.7.4
 pyiso==0.4.0
 PyMeeus==0.3.7
 pyparsing==2.4.7
