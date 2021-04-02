@@ -16,15 +16,12 @@ python peaky_finders/training_pipeline.py --iso NYISO --model xgboost --start_da
 """
 
 
-MODEL_INPUT_DIR = os.path.join(
-    os.path.dirname(__file__), 'training_data')
-MODEL_OUTPUT_DIR = os.path.join(
-    os.path.dirname(__file__), 'models')
+MODEL_INPUT_DIR = os.path.join(os.path.dirname(__file__), "training_data")
+MODEL_OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "models")
 """Directory to hold all pipeline output csv files."""
 
 
 class Pipeline:
-
     def __init__(
         self,
         iso: str,
@@ -32,12 +29,12 @@ class Pipeline:
         start_date: str,
         end_date: str,
         save_model_input: bool,
-        save_model_output: bool
+        save_model_output: bool,
     ) -> None:
         """
         Args:
             iso: the iso to forecast ('nyiso', 'ercot', etc.)
-            model: logistic regression 'log' or xgboost     
+            model: logistic regression 'log' or xgboost
         """
         self.iso_name = iso
         self.model = model
@@ -56,15 +53,19 @@ class Pipeline:
 
     def phase_two(self):
         """Model training & serialization"""
-        y = self.iso.model_input['load_MW']
-        X = self.iso.model_input.drop('load_MW', axis=1)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        y = self.iso.model_input["load_MW"]
+        X = self.iso.model_input.drop("load_MW", axis=1)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
         reg = xgb.XGBRegressor()
         reg.fit(X_train, y_train)
         training_preds = reg.predict(X_train)
         val_preds = reg.predict(X_test)
-        print('Mean Absolute Error:', mean_absolute_error(y_test, val_preds))  
-        print('Root Mean Squared Error:', np.sqrt(mean_squared_error(y_test, val_preds)))
+        print("Mean Absolute Error:", mean_absolute_error(y_test, val_preds))
+        print(
+            "Root Mean Squared Error:", np.sqrt(mean_squared_error(y_test, val_preds))
+        )
         if self.save_model_output:
             pickle.dump(reg, open(self.model_output_filepath, "wb"))
 
@@ -78,8 +79,8 @@ class Pipeline:
         Creates a dew filename depending on data version and feeder selected.
         """
         return os.path.join(
-            MODEL_INPUT_DIR,
-            (f'{self.iso_name}_{self.start}_{self.end}.csv'))
+            MODEL_INPUT_DIR, (f"{self.iso_name}_{self.start}_{self.end}.csv")
+        )
 
     @property
     def model_output_filepath(self):
@@ -87,48 +88,51 @@ class Pipeline:
         Creates a dew filename depending on data version and feeder selected.
         """
         return os.path.join(
-            MODEL_OUTPUT_DIR,
-            (f'xg_boost_{self.iso_name}_load_model.pkl'))
+            MODEL_OUTPUT_DIR, (f"xg_boost_{self.iso_name}_load_model.pkl")
+        )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-i', '--iso',
-        default='NYISO',
+        "-i",
+        "--iso",
+        default="NYISO",
         type=str,
-        help='Select ISO for model prediction.'
+        help="Select ISO for model prediction.",
     )
     parser.add_argument(
-        '-m', '--model',
+        "-m",
+        "--model",
         type=str,
-        help='Model to train (xgboost for forecast, log regression for peak.'
+        help="Model to train (xgboost for forecast, log regression for peak.",
     )
     parser.add_argument(
-        '-s', '--start_date',
-        type=str,
-        help='Start date range for model training.')
+        "-s", "--start_date", type=str, help="Start date range for model training."
+    )
     parser.add_argument(
-        '-e', '--end_date',
-        type=str,
-        help='End date range for model training.')
+        "-e", "--end_date", type=str, help="End date range for model training."
+    )
     parser.add_argument(
-        '-mi', '--save_model_input',
+        "-mi",
+        "--save_model_input",
         type=bool,
-        help='Save model input (w/ features and scaled.')
+        help="Save model input (w/ features and scaled.",
+    )
     parser.add_argument(
-        '-mo', '--save_model_output',
+        "-mo",
+        "--save_model_output",
         type=bool,
-        help='Save trained model as pickle file.'
+        help="Save trained model as pickle file.",
     )
 
     args = parser.parse_args()
     pipeline = Pipeline(
-        iso=args.iso, 
-        model=args.model, 
-        start_date=args.start_date, 
-        end_date=args.end_date, 
-        save_model_input=args.save_model_input, 
-        save_model_output=args.save_model_output
+        iso=args.iso,
+        model=args.model,
+        start_date=args.start_date,
+        end_date=args.end_date,
+        save_model_input=args.save_model_input,
+        save_model_output=args.save_model_output,
     )
     pipeline.execute()
