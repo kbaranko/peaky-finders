@@ -39,7 +39,7 @@ class Pipeline:
         model training for XGBoost ISO forecasts.
 
         Args:
-            iso: the iso to forecast ('nyiso', 'ercot', etc.)
+            iso: the iso to forecast ('NYISO', 'ISONE', etc.)
             model: logistic regression 'log' or xgboost
             start_date: the start date of the training data to fetch
             end_date: the end date of the training data to fetch
