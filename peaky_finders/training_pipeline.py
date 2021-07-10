@@ -3,7 +3,6 @@ import os
 import pickle
 
 import numpy as np
-import pandas as pd
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error
@@ -11,16 +10,17 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from peaky_finders.data_acquisition.train_model import LoadCollector
 
 """
-CLI demo command:
+Demo CLI command:
 python peaky_finders/training_pipeline.py --iso NYISO --model xgboost --start_date 01-01-2019 --end_date 07-28-2020 --save_model_input True --save_model_output True
 """
 
 
 MODEL_INPUT_DIR = os.path.join(
     os.path.dirname(__file__), 'training_data')
+"""Directory to hold model training data as csv files."""
 MODEL_OUTPUT_DIR = os.path.join(
     os.path.dirname(__file__), 'models')
-"""Directory to hold all pipeline output csv files."""
+"""Directory to hold trained models as pkl files."""
 
 
 class Pipeline:
@@ -35,9 +35,16 @@ class Pipeline:
         save_model_output: bool
     ) -> None:
         """
+        Methods to orchestrate data acquisition, feature engingeering, and
+        model training for XGBoost ISO forecasts.
+
         Args:
             iso: the iso to forecast ('nyiso', 'ercot', etc.)
-            model: logistic regression 'log' or xgboost     
+            model: logistic regression 'log' or xgboost
+            start_date: the start date of the training data to fetch
+            end_date: the end date of the training data to fetch
+            save_model_input: save a csv of the feature matrix
+            save_model_output: save a trained xgb regressor as a pkl file
         """
         self.iso_name = iso
         self.model = model
@@ -48,7 +55,7 @@ class Pipeline:
         self.save_model_output = save_model_output
 
     def phase_one(self):
-        """Feature engineering + model preparation """
+        """Feature engineering & model preparation """
         self.iso.engineer_features()
         self.iso.build_model_input()
         if self.save_model_input:
@@ -58,13 +65,17 @@ class Pipeline:
         """Model training & serialization"""
         y = self.iso.model_input['load_MW']
         X = self.iso.model_input.drop('load_MW', axis=1)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
         reg = xgb.XGBRegressor()
         reg.fit(X_train, y_train)
-        training_preds = reg.predict(X_train)
         val_preds = reg.predict(X_test)
-        print('Mean Absolute Error:', mean_absolute_error(y_test, val_preds))  
-        print('Root Mean Squared Error:', np.sqrt(mean_squared_error(y_test, val_preds)))
+        print('Mean Absolute Error:', mean_absolute_error(y_test, val_preds))
+        print('Root Mean Squared Error:', np.sqrt(
+                mean_squared_error(y_test, val_preds)
+            )
+        )
         if self.save_model_output:
             pickle.dump(reg, open(self.model_output_filepath, "wb"))
 
@@ -75,7 +86,8 @@ class Pipeline:
     @property
     def model_input_filepath(self):
         """
-        Creates a dew filename depending on data version and feeder selected.
+        Creates filename for the feature matrix csv based on ISO name and
+        start/end dates.
         """
         return os.path.join(
             MODEL_INPUT_DIR,
@@ -84,7 +96,7 @@ class Pipeline:
     @property
     def model_output_filepath(self):
         """
-        Creates a dew filename depending on data version and feeder selected.
+        Creates filename for the trained model pkl based on ISO name.
         """
         return os.path.join(
             MODEL_OUTPUT_DIR,
@@ -124,11 +136,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     pipeline = Pipeline(
-        iso=args.iso, 
-        model=args.model, 
-        start_date=args.start_date, 
-        end_date=args.end_date, 
-        save_model_input=args.save_model_input, 
+        iso=args.iso,
+        model=args.model,
+        start_date=args.start_date,
+        end_date=args.end_date,
+        save_model_input=args.save_model_input,
         save_model_output=args.save_model_output
     )
     pipeline.execute()
