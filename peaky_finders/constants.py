@@ -1,0 +1,1 @@
+ISO_LIST = ['NYISO', 'ISONE', 'PJM', 'MISO', 'CAISO']
