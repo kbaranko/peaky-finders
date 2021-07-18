@@ -267,7 +267,7 @@ class LoadCollector:
         return temp
 
     @staticmethod
-    def _check_for_holiday(day: pd.TimeStamp) -> bool:
+    def _check_for_holiday(day: pd.Timestamp) -> bool:
         """
         Determine whether a given day was a holiday.
         """
