@@ -1,25 +1,16 @@
 import argparse
-from typing import List
-import datetime as dt
-from datetime import timedelta
-import requests
 import os
 import pickle
-from typing import Dict, Tuple
+from typing import Dict
 
 import pandas as pd
-import pytz, datetime
 from timezonefinderL import TimezoneFinder
 
 from peaky_finders.data_acquisition.train_model import (
     LoadCollector, CATEGORICAL_FEATURES
 )
-from peaky_finders.training_pipeline import MODEL_OUTPUT_DIR, MODEL_INPUT_DIR
-from peaky_finders.data_acquisition.train_model import GEO_COORDS
+from peaky_finders.training_pipeline import MODEL_OUTPUT_DIR
 
-
-PEAK_DATA_PATH = os.path.join(
-    os.path.dirname(__file__), 'historical_peaks')
 
 FORECAST_OUTPUT_DIR = os.path.join(
     os.path.dirname(__file__), 'forecasts')
