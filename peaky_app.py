@@ -8,7 +8,11 @@ import plotly.graph_objects as go
 import plotly.express as px
 from scipy import stats
 
-from peaky_finders.predictor import create_load_duration, ISO_LIST, get_peak_data, get_iso_map, get_forecasts
+from peaky_finders.app_utils import get_peak_data, get_forecasts
+from peaky_finders.constants import ISO_LIST
+from peaky_finders.iso_map import get_iso_map
+from peaky_finders.app_utils import create_load_duration
+
 
 iso_map = get_iso_map()
 peak_data = get_peak_data(ISO_LIST)
