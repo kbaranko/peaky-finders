@@ -16,6 +16,10 @@ tz_finder = TimezoneFinder()
 
 
 def get_forecasts(iso_list: List[str]):
+    """
+    Reads a csv of forecasted load, actual load, and temperature for each ISO
+    and returns as a tz-aware pd.Series.
+    """
     predictions = {}
     historical_load = {}
     temperature = {}
@@ -40,6 +44,9 @@ def get_forecasts(iso_list: List[str]):
 def create_load_duration(
     peak_data: Dict[str, pd.DataFrame]
 ) -> Dict[str, pd.Series]:
+    """
+    Creates a load duration curve for each ISO by sorting historical peak data.
+    """
     load_duration_curves = {}
     for iso in c.ISO_LIST:
         load_duration_curves[iso] = pd.Series(
@@ -49,6 +56,9 @@ def create_load_duration(
 
 
 def get_peak_data(iso_list: list) -> Dict[str, pd.DataFrame]:
+    """
+    Reads a csv of historical peak load data for the ISO list.
+    """
     peak_data = {}
     for iso in iso_list:
         iso_data = pd.read_csv(
