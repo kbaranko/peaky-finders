@@ -12,6 +12,7 @@ ISO_MAP_IDS = {
 }
 
 def get_iso_map() -> gpd.GeoDataFrame:
+    """Reads the csv of ISO geographies and returns as gdf."""
     iso_df = pd.read_csv('iso_map_final.csv')
     iso_df['geometry'] = iso_df['geometry'].apply(wkt.loads)
     iso_gdf = gpd.GeoDataFrame(iso_df, crs="EPSG:4326", geometry='geometry')

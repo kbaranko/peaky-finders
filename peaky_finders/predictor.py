@@ -19,7 +19,12 @@ FORECAST_OUTPUT_DIR = os.path.join(
 tz_finder = TimezoneFinder()
 
 
-def predict_load(iso_name: str, start: str, end: str):
+def predict_load(iso_name: str, start: str, end: str) -> pd.DataFrame:
+    """
+    Predicts load in MW for each timestep between start: end for the given ISO.
+    Returns a df index by timestep with columns for temperature, actual load,
+    and predicted load.
+    """
     load_collector = LoadCollector(iso_name, start, end)
     load_collector.engineer_features()
     load = load_collector.load
@@ -31,16 +36,20 @@ def predict_load(iso_name: str, start: str, end: str):
         axis=1).dropna()
 
 
-def engineer_features(model_input: pd.DataFrame):
+def engineer_features(load_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Converts a dataframe of load into a model input where each column is a
+    feature and each row an input vector.
+    """
     for feature in CATEGORICAL_FEATURES:
         dummies = pd.get_dummies(
-            model_input[feature], prefix=feature, drop_first=True
+            load_df[feature], prefix=feature, drop_first=True
         )
-        model_input = model_input.drop(feature, axis=1)
+        model_input = load_df.drop(feature, axis=1)
         model_input = pd.concat([model_input, dummies], axis=1)
-    if 'holiday_True' not in model_input.columns:
-        model_input['holiday_True'] = 0
-    X = model_input.drop('load_MW', axis=1).astype(float).dropna()
+    if 'holiday_True' not in load_df.columns:
+        load_df['holiday_True'] = 0
+    X = load_df.drop('load_MW', axis=1).astype(float).dropna()
     weekday_cols = [f'weekday_{i + 1}' for i in range(0,6)]
     if len(set(weekday_cols) - set(X.columns)) > 0:
         for col in list(set(weekday_cols) - set(X.columns)):
@@ -49,6 +58,7 @@ def engineer_features(model_input: pd.DataFrame):
 
 
 def load_model(iso_name: str):
+    """Reads the trained model pkl file for the given ISO"""
     model_path = os.path.join(
         MODEL_OUTPUT_DIR,
         f'xg_boost_{iso_name}_load_model.pkl'
@@ -57,11 +67,19 @@ def load_model(iso_name: str):
 
 
 def save_forecasts(iso_name: str, predictions_df: pd.DataFrame) -> None:
+    """Saves a df of predicted and actual load as a csv file."""
     filename = f'{iso_name}_forecasts.csv'
     predictions_df.to_csv(os.path.join(FORECAST_OUTPUT_DIR, filename))
 
 
-def predict_all(iso_list: list, start: str, end: str) -> Dict[str, pd.DataFrame]:
+def predict_all(
+    iso_list: list,
+    start: str,
+    end: str
+) -> Dict[str, pd.DataFrame]:
+    """
+    For all ISOs in the list, predict load for the start: end.
+    """
     load_dict = {}
     for iso in iso_list:
         load_dict[iso] = predict_load(
