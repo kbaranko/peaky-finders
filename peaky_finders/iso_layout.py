@@ -179,7 +179,7 @@ def plot_histogram(iso: str, peak_data: dict):
 
 def plot_scatter(value, iso: str, peak_data: dict):
     fig = px.scatter(
-        peak_data[iso.upper()],
+        peak_data[iso.upper()].dropna(),
         x="load_MW",
         y="temperature", 
         color=value
@@ -191,8 +191,8 @@ def plot_scatter(value, iso: str, peak_data: dict):
 def plot_load_duration(iso: str, load_duration_curves: dict):
     return go.Figure().add_trace(
         go.Scatter(
-            x=load_duration_curves['NYISO'].reset_index().index,
-            y=load_duration_curves['NYISO'].values,
+            x=load_duration_curves[iso.upper()].reset_index().index,
+            y=load_duration_curves[iso.upper()].values,
             mode = 'lines',
             fill='tozeroy',
             line=dict(color='maroon', width=3)
