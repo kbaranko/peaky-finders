@@ -11,6 +11,7 @@ ISO_MAP_IDS = {
     13501: 'NYISO'
 }
 
+
 def get_iso_map() -> gpd.GeoDataFrame:
     """Reads the csv of ISO geographies and returns as gdf."""
     iso_df = pd.read_csv('iso_map_final.csv')
