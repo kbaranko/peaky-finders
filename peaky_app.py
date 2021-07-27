@@ -2,11 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import geopandas as gpd
-import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
-from scipy import stats
 
 from peaky_finders.app_utils import get_peak_data, get_forecasts
 import peaky_finders.constants as c
@@ -76,7 +72,7 @@ index_page = html.Div([
                             fitbounds="locations",
                             visible=False).update_layout(
                                 height=600,
-                                margin={"r":0,"t":0,"l":0,"b":0},
+                                margin={"r": 0, "t": 0, "l": 0, "b": 0},
                             )
                         ) 
         ], style = {'display': 'inline-block', 'width': '90%'})
