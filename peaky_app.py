@@ -9,18 +9,20 @@ import plotly.express as px
 from scipy import stats
 
 from peaky_finders.app_utils import get_peak_data, get_forecasts
-from peaky_finders.constants import ISO_LIST
+import peaky_finders.constants as c
 from peaky_finders.iso_map import get_iso_map
 from peaky_finders.app_utils import create_load_duration
+import peaky_finders.iso_layout as l
 
 
 iso_map = get_iso_map()
-peak_data = get_peak_data(ISO_LIST)
-predictions, load, temperature = get_forecasts(ISO_LIST)
+peak_data = get_peak_data(c.ISO_LIST)
+predictions, load, temperature = get_forecasts(c.ISO_LIST)
 load_duration_curves = create_load_duration(peak_data)
 
 
 TEMPLATE = 'plotly_white'
+MONTH = 'February'
 
 app = dash.Dash(
     external_stylesheets=[dbc.themes.LUX],
@@ -47,28 +49,7 @@ index_page = html.Div([
             dbc.Col(
                 html.Div([
                     html.H4(children="To what extent do weather and weekday determine total electricity demand on the grid? Click an ISO button below to find out."),
-                    html.Div(
-                        [
-                            dcc.Link(
-                                html.Button('HOME', id='home-button', className="mr-1"),
-                                href='/'),
-                            dcc.Link(
-                                html.Button('CAISO', id='caiso-button', className="mr-1"),
-                                href='/caiso'),
-                            dcc.Link(
-                                html.Button('MISO', id='miso-button', className="mr-1"),
-                                href='/miso'),
-                            dcc.Link(
-                                html.Button('PJM', id='pjm-button', className="mr-1"),
-                                href='/pjm'),
-                            dcc.Link(
-                                html.Button('NYISO', id='nyiso-button', className="mr-1"),
-                                href='/nyiso'),
-                            dcc.Link(
-                                html.Button('ISONE', id='isone-button', className="mr-1"),
-                                href='/isone'),
-                        ]
-                )]), width=7
+                    html.Div(l.BUTTON_LAYOUT)]), width=7
             ),
             dbc.Col(width=3),
         ], justify="center"),
@@ -99,150 +80,16 @@ index_page = html.Div([
 
 
 """NYISO LAYOUT"""
-nyiso_layout = html.Div([
-    html.Div(id='nyiso-content'),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(
-            html.Div(
-                [
-                    dcc.Link(
-                        html.Button('HOME', id='home-button', className="mr-1"),
-                        href='/'),
-                    dcc.Link(
-                        html.Button('CAISO', id='caiso-button', className="mr-1"),
-                        href='/caiso'),
-                    dcc.Link(
-                        html.Button('MISO', id='miso-button', className="mr-1"),
-                        href='/miso'),
-                    dcc.Link(
-                        html.Button('PJM', id='pjm-button', className="mr-1"),
-                        href='/pjm'),
-                    dcc.Link(
-                        html.Button('NYISO', id='nyiso-button', className="mr-1"),
-                        href='/nyiso'),
-                    dcc.Link(
-                        html.Button('ISONE', id='isone-button', className="mr-1"),
-                        href='/isone'),
-                ]
-            ), width=4),
-        dbc.Col(width=7),
-    ], justify='center'),
-    html.Br(),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(html.H1('New York Independent System Operator (NYISO)'), width=9),
-        dbc.Col(width=2),
-    ], justify='center'),
-    dbc.Row([
-        dbc.Col(
-        html.Div(children='''
-            "The NYISO is the New York Independent System Operator — the organization responsible for
-            managing New York’s electric grid and its competitive wholesale electric marketplace." For more information,
-            visit https://www.nyiso.com/.
-        '''), width=9),
-        dbc.Col(width=2)
-    ], justify='center'),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(
-            html.H3('Model Performance'), width=9
-        ),
-        dbc.Col(width=2),
-    ], justify='center'),
-    dbc.Row([
-        dbc.Col(
-            html.Div(
-                children='''Mean Absolute Error (MAE) for February, 2021: 347.62 (pretty good)'''
-            ), width=9
-        ),
-        dbc.Col(width=2),
-    ], justify='center'),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(
-                dcc.Dropdown(
-                    id='nyiso-dropdown',
-                    options=[
-                        {'label': 'Actual', 'value': 'Actual'},
-                        {'label': 'Predicted', 'value': 'Predicted'}
-                    ],
-                    value=['Actual', 'Predicted'],
-                    multi=True,
-                ), width=6
-        ),
-        dbc.Col(width=5),
-    ], justify='center'),
-    dcc.Graph(id='nyiso-graph'),
-    html.Br(),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(html.H3('Training Data'), width=9),
-        dbc.Col(width=2)
-    ], justify='center'),
-    dbc.Row([
-        dbc.Col(
-                html.Div(children='''
-                    The NYISO forecasting model was trained on historical load and weather data
-                    from 2018-2021. Temperature readings are from New York City.
-                '''), width=9
-        ),
-        dbc.Col(width=2)
-    ], justify='center'),
-    html.Br(),
-    dbc.Row(
-        [
-            dbc.Col(
-                html.Div([
-                    dcc.Graph(
-                        figure=px.histogram(
-                            peak_data['NYISO'],
-                            x=peak_data['NYISO']['load_MW'],
-                            nbins=75,
-                            marginal="rug",
-                            title=f"Distribution of NYISO Daily Peaks",
-                            color_discrete_sequence=['darkturquoise'] 
-                        ).update_layout(
-                            template=TEMPLATE,
-                            xaxis_title='Peak Load (MW)',
-                            yaxis_title='Number of Days'
-                        )
-                    ),
-                ]), width=4),
-            dbc.Col(
-                html.Div([
-                    dcc.Graph(
-                        figure=go.Figure().add_trace(
-                            go.Scatter(
-                                x=load_duration_curves['NYISO'].reset_index().index,
-                                y=load_duration_curves['NYISO'].values,
-                                mode = 'lines',
-                                fill='tozeroy',
-                                line=dict(color='maroon', width=3)
-                            )).update_layout(
-                                title="Peak Load Sorted by Day (Highest to Lowest)",
-                                xaxis_title="Number of Days",
-                                yaxis_title="Load (MW)",
-                                template=TEMPLATE),
-                        ),
-                    ]), width=4),
-            dbc.Col(
-                html.Div([
-                    dcc.Dropdown(
-                        id='nyiso-scatter-dropdown',
-                        options=[
-                            {'label': 'Day of Week', 'value': 'weekday'},
-                            {'label': 'Season', 'value': 'season'}
-                            ],
-                        value='season',
-                        multi=False,
-                    ),
-                    dcc.Graph(id='nyiso-scatter')
-                ]
-            ), width=4),
-        ]
-    ),
-])
+nyiso_layout = l.set_iso_layout(
+    iso='nyiso',
+    full_name=c.NYISO_FULL_NAME,
+    description=c.NYISO_DESCRIPTION,
+    month=MONTH,
+    mae=c.NYISO_MAE,
+    model_description=c.NYISO_MODEL_DESCRIPTION,
+    peak_data=peak_data,
+    load_duration_curves=load_duration_curves,
+)
 @app.callback(dash.dependencies.Output('nyiso-content', 'children'),
               [dash.dependencies.Input('nyiso-button', 'value')])
 
@@ -250,183 +97,27 @@ nyiso_layout = html.Div([
 @app.callback(dash.dependencies.Output('nyiso-graph', 'figure'),
              [dash.dependencies.Input('nyiso-dropdown', 'value')])
 def plot_nyiso_load_(value):
-    fig = go.Figure()
-    if 'Actual' in value:
-        fig.add_trace(go.Scatter(
-            x=load['NYISO'].index,
-            y=load['NYISO'].values,
-            name='Actual Load',
-            line=dict(color='maroon', width=3)))
-    if 'Predicted' in value:
-        fig.add_trace(go.Scatter(
-            x=predictions['NYISO'].index,
-            y=predictions['NYISO'].values,
-            name = 'Forecasted Load',
-            line=dict(color='darkturquoise', width=3, dash='dash')))
-    return fig.update_layout(
-        title="System Load: Actual vs. Predicted",
-        xaxis_title="Date",
-        yaxis_title="Load (MW)",
-        template=TEMPLATE
+    return l.plot_load_curve(
+        value, iso='nyiso', load=load, predictions=predictions
     )
 
 @app.callback(dash.dependencies.Output("nyiso-scatter", "figure"), 
     [dash.dependencies.Input("nyiso-scatter-dropdown", "value")])
 def nyiso_scatter_plot(value):
-    fig = px.scatter(
-        peak_data['NYISO'],
-        x="load_MW",
-        y="temperature", 
-        color=value
-    )
-    return fig.update_layout(template=TEMPLATE, title='Peak Load vs. Temperature')
+    return l.plot_scatter(value, iso='nyiso', peak_data=peak_data)
 
 
 """PJM LAYOUT"""
-pjm_layout = html.Div([
-    html.Div(id='pjm-content'),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(
-            html.Div(
-                [
-                    dcc.Link(
-                        html.Button('HOME', id='home-button', className="mr-1"),
-                        href='/'),
-                    dcc.Link(
-                        html.Button('CAISO', id='caiso-button', className="mr-1"),
-                        href='/caiso'),
-                    dcc.Link(
-                        html.Button('MISO', id='miso-button', className="mr-1"),
-                        href='/miso'),
-                    dcc.Link(
-                        html.Button('PJM', id='pjm-button', className="mr-1"),
-                        href='/pjm'),
-                    dcc.Link(
-                        html.Button('NYISO', id='nyiso-button', className="mr-1"),
-                        href='/nyiso'),
-                    dcc.Link(
-                        html.Button('ISONE', id='isone-button', className="mr-1"),
-                        href='/isone'),
-                ]
-            ), width=4),
-        dbc.Col(width=7),
-    ], justify='center'),
-    html.Br(),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(html.H1('Pennsylvania, Jersey, Maryland Power Pool (PJM)'), width=9),
-        dbc.Col(width=2),
-    ], justify='center'),
-    dbc.Row([
-        dbc.Col(
-        html.Div(children='''
-            "PJM is a regional transmission organization (RTO) that coordinates the
-            movement of wholesale electricity in all or parts of 13 states and
-            the District of Columbia." For more information, visit https://www.pjm.com.
-        '''), width=9),
-        dbc.Col(width=2)
-    ], justify='center'),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(
-            html.H3('Model Performance'), width=9
-        ),
-        dbc.Col(width=2),
-    ], justify='center'),
-    dbc.Row([
-        dbc.Col(
-            html.Div(
-                children='''Mean Absolute Error (MAE) for February, 2021: 2,886.66 (not great)'''
-            ), width=9
-        ),
-        dbc.Col(width=2),
-    ], justify='center'),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(
-                dcc.Dropdown(
-                    id='pjm-dropdown',
-                    options=[
-                        {'label': 'Actual', 'value': 'Actual'},
-                        {'label': 'Predicted', 'value': 'Predicted'}
-                    ],
-                    value=['Actual', 'Predicted'],
-                    multi=True,
-                ), width=6
-        ),
-        dbc.Col(width=5),
-    ], justify='center'),
-    dcc.Graph(id='pjm-graph'),
-    html.Br(),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(html.H3('Training Data'), width=9),
-        dbc.Col(width=2)
-    ], justify='center'),
-    dbc.Row([
-        dbc.Col(
-                html.Div(children='''
-                    The PJM forecasting model was trained on historical load and weather data
-                    from 2018-2021. Temperature readings are from Philadelphia.
-                '''), width=9
-        ),
-        dbc.Col(width=2)
-    ], justify='center'),
-    html.Br(),
-    dbc.Row(
-        [
-            dbc.Col(
-                html.Div([
-                    dcc.Graph(
-                        figure=px.histogram(
-                            peak_data['PJM'],
-                            x=peak_data['PJM']['load_MW'],
-                            nbins=75,
-                            marginal="rug",
-                            title=f"Distribution of PJM Daily Peaks",
-                            color_discrete_sequence=['darkturquoise'] 
-                        ).update_layout(
-                            template=TEMPLATE,
-                            xaxis_title='Peak Load (MW)',
-                            yaxis_title='Number of Days'
-                        )
-                    ),
-                ]), width=4),
-            dbc.Col(
-                html.Div([
-                    dcc.Graph(
-                        figure=go.Figure().add_trace(
-                            go.Scatter(
-                                x=load_duration_curves['PJM'].reset_index().index,
-                                y=load_duration_curves['PJM'].values,
-                                mode = 'lines',
-                                fill='tozeroy',
-                                line=dict(color='maroon', width=3)
-                            )).update_layout(
-                                title="Peak Load Sorted by Day (Highest to Lowest)",
-                                xaxis_title="Number of Days",
-                                yaxis_title="Load (MW)",
-                                template=TEMPLATE),
-                        ),
-                    ]), width=4),
-            dbc.Col(
-                html.Div([
-                    dcc.Dropdown(
-                        id='pjm-scatter-dropdown',
-                        options=[
-                            {'label': 'Day of Week', 'value': 'weekday'},
-                            {'label': 'Season', 'value': 'season'}
-                            ],
-                        value='season',
-                        multi=False,
-                    ),
-                    dcc.Graph(id='pjm-scatter')
-                ]
-            ), width=4),
-        ]
-    ),
-])
+pjm_layout = l.set_iso_layout(
+    iso='pjm',
+    full_name=c.PJM_FULL_NAME,
+    description=c.PJM_DESCRIPTION,
+    month='February',
+    mae=c.PJM_MAE,
+    model_description=c.PJM_MODEL_DESCRIPTION,
+    peak_data=peak_data,
+    load_duration_curves=load_duration_curves,
+)
 @app.callback(dash.dependencies.Output('pjm-content', 'children'),
               [dash.dependencies.Input('pjm-button', 'value')])
 
@@ -434,36 +125,15 @@ pjm_layout = html.Div([
 @app.callback(dash.dependencies.Output('pjm-graph', 'figure'),
              [dash.dependencies.Input('pjm-dropdown', 'value')])
 def plot_pjm_load_(value):
-    fig = go.Figure()
-    if 'Actual' in value:
-        fig.add_trace(go.Scatter(
-            x=load['PJM'].index,
-            y=load['PJM'].values,
-            name='Actual Load',
-            line=dict(color='maroon', width=3)))
-    if 'Predicted' in value:
-        fig.add_trace(go.Scatter(
-            x=predictions['PJM'].index,
-            y=predictions['PJM'].values,
-            name = 'Forecasted Load',
-            line=dict(color='darkturquoise', width=3, dash='dash')))
-    return fig.update_layout(
-        title="System Load: Actual vs. Predicted",
-        xaxis_title="Date",
-        yaxis_title="Load (MW)",
-        template=TEMPLATE
+    return l.plot_load_curve(
+        value, iso='pjm', load=load, predictions=predictions
     )
 
 @app.callback(dash.dependencies.Output("pjm-scatter", "figure"), 
     [dash.dependencies.Input("pjm-scatter-dropdown", "value")])
 def pjm_scatter_plot(value):
-    fig = px.scatter(
-        peak_data['PJM'],
-        x="load_MW",
-        y="temperature", 
-        color=value
-    )
-    return fig.update_layout(template=TEMPLATE, title='Peak Load vs. Temperature')
+    return l.plot_scatter(value, iso='pjm', peak_data=peak_data)
+
 
 """MISO LAYOUT"""
 miso_layout = html.Div([
