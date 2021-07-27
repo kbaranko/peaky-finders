@@ -35,7 +35,7 @@ def set_iso_layout(
     full_name: str,
     description: str,
     month: str,
-    mae: int,
+    mae: float,
     model_description: str,
     peak_data: dict,
     load_duration_curves: dict

@@ -34,3 +34,38 @@ PJM_MODEL_DESCRIPTION = '''
     from 2018-2021. Temperature readings are from Philadelphia.
 '''
 PJM_MAE = 2886.66
+
+
+"""MISO layout constants"""
+MISO_FULL_NAME = 'Midcontinent Independent System Operator (MISO)'
+MISO_DESCRIPTION = '''
+    "Midcontinent Independent System Operator (MISO) is an independent,
+    not-for-profit organization that delivers safe, cost-effective 
+    electric power across 15 U.S. states and the Canadian province of 
+    Manitoba." For more information,
+    visit www.misoenergy.org.
+'''
+MISO_MODEL_DESCRIPTION = '''
+    The MISO forecasting model was trained on historical load and weather data
+    from 2018-2021. Temperature readings are from Minneapolis.
+'''
+MISO_MAE = 2382.66
+
+
+"""ISONE layout constants"""
+ISONE_FULL_NAME = 'Independent System Operator of New England (ISONE)'
+ISONE_DESCRIPTION = '''
+    ISONE is the "independent, not-for-profit corporation responsible 
+    for keeping electricity flowing across the six New England states 
+    and ensuring that the region has reliable, competitively priced 
+    wholesale electricity today and into the future." For more information,
+    visit www.iso-ne.com.
+'''
+ISONE_MODEL_DESCRIPTION = '''
+    The ISONE model was trained on historical load and weather data
+    from 2018-2021. Temperature readings are from Boston.
+'''
+ISONE_MAE = 522.43
+
+
+"""CAISO layout constants"""
