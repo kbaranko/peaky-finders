@@ -192,152 +192,16 @@ def isone_scatter_plot(value):
 
 
 """CAISO LAYOUT"""
-caiso_layout = html.Div([
-    html.Div(id='caiso-content'),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(
-            html.Div(
-                [
-                    dcc.Link(
-                        html.Button('HOME', id='home-button', className="mr-1"),
-                        href='/'),
-                    dcc.Link(
-                        html.Button('CAISO', id='caiso-button', className="mr-1"),
-                        href='/caiso'),
-                    dcc.Link(
-                        html.Button('MISO', id='miso-button', className="mr-1"),
-                        href='/miso'),
-                    dcc.Link(
-                        html.Button('PJM', id='pjm-button', className="mr-1"),
-                        href='/pjm'),
-                    dcc.Link(
-                        html.Button('NYISO', id='nyiso-button', className="mr-1"),
-                        href='/nyiso'),
-                    dcc.Link(
-                        html.Button('ISONE', id='isone-button', className="mr-1"),
-                        href='/isone'),
-                ]
-            ), width=4),
-        dbc.Col(width=7),
-    ], justify='center'),
-    html.Br(),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(html.H1('California Independent System Operator (CAISO)'), width=9),
-        dbc.Col(width=2),
-    ], justify='center'),
-    dbc.Row([
-        dbc.Col(
-        html.Div(children='''
-            "The California Independent System Operator (ISO) maintains 
-            reliability on one of the largest and most modern power grids in 
-            the world, and operates a transparent, accessible wholesale energy 
-            market."  For more information,
-            visit http://www.caiso.com/.
-        '''), width=9),
-        dbc.Col(width=2)
-    ], justify='center'),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(
-            html.H3('Model Performance'), width=9
-        ),
-        dbc.Col(width=2),
-    ], justify='center'),
-    dbc.Row([
-        dbc.Col(
-            html.Div(
-                children='''Mean Absolute Error (MAE) for February, 2021: 455.91 (pretty good)'''
-            ), width=9
-        ),
-        dbc.Col(width=2),
-    ], justify='center'),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(
-                dcc.Dropdown(
-                    id='caiso-dropdown',
-                    options=[
-                        {'label': 'Actual', 'value': 'Actual'},
-                        {'label': 'Predicted', 'value': 'Predicted'}
-                    ],
-                    value=['Actual', 'Predicted'],
-                    multi=True,
-                ), width=6
-        ),
-        dbc.Col(width=5),
-    ], justify='center'),
-    dcc.Graph(id='caiso-graph'),
-    html.Br(),
-    html.Br(),
-    dbc.Row([
-        dbc.Col(html.H3('Training Data'), width=9),
-        dbc.Col(width=2)
-    ], justify='center'),
-    dbc.Row([
-        dbc.Col(
-                html.Div(children='''
-                    The CAISO forecasting model was trained on historical load and weather data
-                    from 2018-2021. Temperature readings were from Los Angeles.
-                '''), width=9
-        ),
-        dbc.Col(width=2)
-    ], justify='center'),
-    html.Br(),
-    dbc.Row(
-        [
-            dbc.Col(
-                html.Div([
-                    dcc.Graph(
-                        figure=px.histogram(
-                            peak_data['CAISO'],
-                            x=peak_data['CAISO']['load_MW'],
-                            nbins=75,
-                            marginal="rug",
-                            title=f"Distribution of CAISO Daily Peaks",
-                            color_discrete_sequence=['darkturquoise'] 
-                        ).update_layout(
-                            template=TEMPLATE,
-                            xaxis_title='Peak Load (MW)',
-                            yaxis_title='Number of Days'
-                        )
-                    ),
-                ]), width=4),
-            dbc.Col(
-                html.Div([
-                    dcc.Graph(
-                        figure=go.Figure().add_trace(
-                            go.Scatter(
-                                x=load_duration_curves['CAISO'].reset_index().index,
-                                y=load_duration_curves['CAISO'].values,
-                                mode = 'lines',
-                                fill='tozeroy',
-                                line=dict(color='maroon', width=3)
-                            )).update_layout(
-                                title="Peak Load Sorted by Day (Highest to Lowest)",
-                                xaxis_title="Number of Days",
-                                yaxis_title="Load (MW)",
-                                template=TEMPLATE),
-                        ),
-                    ]), width=4),
-            dbc.Col(
-                html.Div([
-                    dcc.Dropdown(
-                        id='caiso-scatter-dropdown',
-                        options=[
-                            {'label': 'Day of Week', 'value': 'weekday'},
-                            {'label': 'Season', 'value': 'season'}
-                            ],
-                        value='season',
-                        multi=False,
-                    ),
-                    dcc.Graph(id='caiso-scatter')
-                ]
-            ), width=4),
-        ]
-    ),
-])
+caiso_layout = l.set_iso_layout(
+    iso='caiso',
+    full_name=c.CAISO_FULL_NAME,
+    description=c.CAISO_DESCRIPTION,
+    month=MONTH,
+    mae=c.CAISO_MAE,
+    model_description=c.CAISO_MODEL_DESCRIPTION,
+    peak_data=peak_data,
+    load_duration_curves=load_duration_curves,
+)
 @app.callback(dash.dependencies.Output('caiso-content', 'children'),
               [dash.dependencies.Input('caiso-button', 'value')])
 
@@ -345,36 +209,15 @@ caiso_layout = html.Div([
 @app.callback(dash.dependencies.Output('caiso-graph', 'figure'),
              [dash.dependencies.Input('caiso-dropdown', 'value')])
 def plot_caiso_load_(value):
-    fig = go.Figure()
-    if 'Actual' in value:
-        fig.add_trace(go.Scatter(
-            x=load['CAISO'].index,
-            y=load['CAISO'].values,
-            name='Actual Load',
-            line=dict(color='maroon', width=3)))
-    if 'Predicted' in value:
-        fig.add_trace(go.Scatter(
-            x=predictions['CAISO'].index,
-            y=predictions['CAISO'].values,
-            name = 'Forecasted Load',
-            line=dict(color='darkturquoise', width=3, dash='dash')))
-    return fig.update_layout(
-        title="System Load: Actual vs. Predicted",
-        xaxis_title="Date",
-        yaxis_title="Load (MW)",
-        template=TEMPLATE
+    return l.plot_load_curve(
+        value, iso='caiso', load=load, predictions=predictions
     )
 
 @app.callback(dash.dependencies.Output("caiso-scatter", "figure"), 
     [dash.dependencies.Input("caiso-scatter-dropdown", "value")])
 def caiso_scatter_plot(value):
-    fig = px.scatter(
-        peak_data['CAISO'].dropna(),
-        x="load_MW",
-        y="temperature", 
-        color=value
-    )
-    return fig.update_layout(template=TEMPLATE, title='Peak Load vs. Temperature')
+    return l.plot_scatter(value, iso='caiso', peak_data=peak_data)
+
 
 # Update the index
 @app.callback(dash.dependencies.Output('page-content', 'children'),

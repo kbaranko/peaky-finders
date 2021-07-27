@@ -69,3 +69,16 @@ ISONE_MAE = 522.43
 
 
 """CAISO layout constants"""
+CAISO_FULL_NAME = 'California Independent System Operator (CAISO)'
+CAISO_DESCRIPTION = '''
+    "The California Independent System Operator (ISO) maintains 
+    reliability on one of the largest and most modern power grids in 
+    the world, and operates a transparent, accessible wholesale energy 
+    market."  For more information,
+    visit http://www.caiso.com/.
+'''
+CAISO_MODEL_DESCRIPTION = '''
+    The CAISO forecasting model was trained on historical load and weather data
+    from 2018-2021. Temperature readings were from Los Angeles.
+'''
+CAISO_MAE = 455.91
