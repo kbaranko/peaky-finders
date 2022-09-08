@@ -4,7 +4,7 @@ Peaky Finders is a Plotly Dash application with helpful peak load visualizations
 
 The application has been deployed on Heroku: https://peaky-finders.herokuapp.com/
 
-## Tech Stack
+## Stack
 
 - Python 
 - Pandas
